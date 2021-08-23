@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { auth } from "./lib/firebase/firebase";
 import { fetchUserData } from "./features/user/user-slice";
 import Navbar from "./components/Navbar/Navbar";
+import Blurred from "./components/Blurred/Blurred";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -59,6 +60,7 @@ const App = () => {
           </Route>
         </Switch>
       </Suspense>
+      <Blurred />
     </Container>
   );
 };
