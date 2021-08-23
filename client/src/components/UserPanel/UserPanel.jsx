@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import profileSvgSrc from "../../assets/profileWave.svg";
+import { selectNumFriends } from "../../features/friends/friends-selector";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -75,6 +76,8 @@ const UserPanel = () => {
     userData: { displayName, status, photoURL },
   } = useSelector((state) => state.user);
 
+  const numFriends = useSelector(selectNumFriends);
+
   return (
     <div className={classes.root}>
       <Paper className={classes.paper} elevation={6}>
@@ -125,7 +128,7 @@ const UserPanel = () => {
             align="center"
             color="textPrimary"
           >
-            24
+            {numFriends}
           </Typography>
         </div>
 
