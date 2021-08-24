@@ -1,7 +1,7 @@
 import { Container, makeStyles } from "@material-ui/core";
 import { lazy, Suspense, useEffect } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { auth } from "./lib/firebase/firebase";
 import { fetchUserData } from "./features/user/user-slice";
@@ -28,6 +28,9 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       dispatch(fetchUserData(user));
+      if (user) {
+        toast.success(`Welcome ${user.displayName}`);
+      }
     });
 
     // stop listenning when component unmounts
