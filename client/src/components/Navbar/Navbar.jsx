@@ -4,17 +4,15 @@ import {
   AppBar,
   Badge,
   Button,
-  InputAdornment,
-  TextField,
   Typography,
   useScrollTrigger,
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import NotificationsIcon from "@material-ui/icons/Notifications";
-import SearchIcon from "@material-ui/icons/Search";
 import { auth } from "../../lib/firebase/firebase";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import NavSearchBar from "../NavSearchBar/NavSearchBar";
 
 const ElevationScroll = (props) => {
   const { children, window } = props;
@@ -52,13 +50,6 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     gap: "1.5rem",
   },
-  searchbar: {
-    width: "50rem",
-  },
-  smoothAnimation: {
-    borderRadius: theme.spacing(3),
-    transition: "all 0.4s ease",
-  },
 }));
 
 const Navbar = (props) => {
@@ -75,24 +66,7 @@ const Navbar = (props) => {
           </Typography>
         </Link>
 
-        {userData && (
-          <TextField
-            className={classes.searchbar}
-            variant="outlined"
-            placeholder="Search People"
-            margin="dense"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="inherit" />
-                </InputAdornment>
-              ),
-              classes: {
-                notchedOutline: classes.smoothAnimation,
-              },
-            }}
-          />
-        )}
+        {userData && <NavSearchBar />}
 
         <div className={classes.navLinks}>
           {userData ? (

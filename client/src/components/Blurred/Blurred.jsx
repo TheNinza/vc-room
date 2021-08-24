@@ -22,7 +22,10 @@ const Blurred = () => {
   const fullPageBlurred = useSelector((state) => state.ui.fullPageBlurred);
 
   return (
-    <div className={fullPageBlurred ? classes.enabled : classes.disabled} />
+    <div
+      style={{ transition: "all 0.5s ease" }}
+      className={fullPageBlurred ? classes.enabled : classes.disabled}
+    />
   );
 };
 
