@@ -3,7 +3,7 @@ import SearchIcon from "@material-ui/icons/Search";
 
 import { makeStyles } from "@material-ui/core";
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   disableFullPageBlur,
   enableFullPageBlur,
@@ -41,6 +41,7 @@ const NavSearchBar = () => {
   const [showResults, setShowResults] = useState(false);
 
   const dispatch = useDispatch();
+  const fullPageBlurred = useSelector((state) => state.ui.fullPageBlurred);
 
   const getSearchResults = useCallback(
     debounce(async (query) => {
@@ -74,10 +75,10 @@ const NavSearchBar = () => {
   useEffect(() => {
     if (showResults) {
       dispatch(enableFullPageBlur());
-    } else {
+    } else if (!showResults && !searchString.length) {
       dispatch(disableFullPageBlur());
     }
-  }, [showResults, dispatch]);
+  }, [showResults, searchString, dispatch]);
 
   return (
     <>
@@ -105,8 +106,7 @@ const NavSearchBar = () => {
       <div className={classes.searchContainer}>
         {loading ? (
           <h1>Loading...</h1>
-        ) : (
-          showResults &&
+        ) : fullPageBlurred ? (
           searchResult.map((r, idx) => (
             <SearchResultCard
               uid={r.uid}
@@ -115,6 +115,8 @@ const NavSearchBar = () => {
               key={idx}
             />
           ))
+        ) : (
+          ""
         )}
       </div>
     </>

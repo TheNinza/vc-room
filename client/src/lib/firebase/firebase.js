@@ -18,6 +18,7 @@ if (!firebase.apps.length) {
 
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
+export const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp;
 
 // signing in with google
 const googleAuthProvider = new firebase.auth.GoogleAuthProvider();

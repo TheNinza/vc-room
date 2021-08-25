@@ -1,5 +1,6 @@
 import { makeStyles } from "@material-ui/core";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { disableFullPageBlur } from "../../features/ui/ui-slice";
 
 const useStyles = makeStyles((theme) => ({
   disabled: {},
@@ -20,9 +21,10 @@ const Blurred = () => {
   const classes = useStyles();
 
   const fullPageBlurred = useSelector((state) => state.ui.fullPageBlurred);
-
+  const dispatch = useDispatch();
   return (
     <div
+      onClick={() => dispatch(disableFullPageBlur())}
       style={{ transition: "all 0.5s ease" }}
       className={fullPageBlurred ? classes.enabled : classes.disabled}
     />
