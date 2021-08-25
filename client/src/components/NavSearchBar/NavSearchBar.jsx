@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) => ({
 const NavSearchBar = () => {
   const classes = useStyles();
   const [searchString, setSearchString] = useState("");
-  const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState([]);
   const [showResults, setShowResults] = useState(false);
 
@@ -104,20 +103,16 @@ const NavSearchBar = () => {
       />
 
       <div className={classes.searchContainer}>
-        {loading ? (
-          <h1>Loading...</h1>
-        ) : fullPageBlurred ? (
-          searchResult.map((r, idx) => (
-            <SearchResultCard
-              uid={r.uid}
-              displayName={r.displayName}
-              photoURL={r.photoURL}
-              key={idx}
-            />
-          ))
-        ) : (
-          ""
-        )}
+        {fullPageBlurred
+          ? searchResult.map((r, idx) => (
+              <SearchResultCard
+                uid={r.uid}
+                displayName={r.displayName}
+                photoURL={r.photoURL}
+                key={idx}
+              />
+            ))
+          : ""}
       </div>
     </>
   );
