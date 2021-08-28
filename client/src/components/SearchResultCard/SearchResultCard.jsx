@@ -77,7 +77,7 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
 
       batch.set(senderNotificationRef, {
         notificationId: notificationRef.id,
-        createdAt: timeStamp,
+        status: "pending",
       });
 
       batch.set(recieverNotificationRef, {
