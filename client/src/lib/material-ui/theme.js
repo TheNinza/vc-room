@@ -7,6 +7,9 @@ export const theme = createTheme({
       default: "#1C1D28",
       paper: "#28293D",
     },
+    primary: {
+      main: "#4e69ff",
+    },
   },
   typography: {
     fontFamily: '"Poppins", sans-serif',

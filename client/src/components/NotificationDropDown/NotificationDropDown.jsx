@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
     position: "fixed",
     top: "8vh",
     right: "1rem",
-    width: "20rem",
+    width: "30rem",
     padding: "0.5rem",
     zIndex: 2000,
     backdropFilter: "blur( 10px )",
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     background: "rgba(0, 0, 0, 0.3)",
     height: "28rem",
 
-    overflow: "scroll",
+    overflowY: "scroll",
     textAlign: "center",
   },
 }));

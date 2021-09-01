@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/styles";
 import { useState, useEffect } from "react";
 import { firestore } from "../../lib/firebase/firebase";
-import { Avatar, Paper, Typography } from "@material-ui/core";
+import { Avatar, Button, Paper, Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
@@ -18,8 +18,12 @@ const useStyles = makeStyles((theme) => ({
     WebkitBackdropFilter: "blur( 10px )",
     background: "rgba(0, 0, 0, 0.13)",
   },
-  name: {
+  notificationBody: {
     flex: 1,
+  },
+  buttonContainer: {
+    display: "flex",
+    gap: "0.5rem",
   },
 }));
 
@@ -37,14 +41,22 @@ const NotificationCard = ({ notification }) => {
     : { photoURL: "", displayName: "" };
 
   useEffect(() => {
-    if (notification?.to) {
+    if (notificationRecieved) {
+      firestore
+        .collection("users")
+        .doc(notification.from)
+        .get()
+        .then((res) => setToUser(res.data()));
+    } else {
       firestore
         .collection("users")
         .doc(notification.to)
         .get()
         .then((res) => setToUser(res.data()));
     }
-  }, [notification]);
+  }, [notification, notificationRecieved]);
+
+  // conditional rendering functions
 
   const notificationBody = () => {
     if (notification.status === "pending") {
@@ -55,16 +67,60 @@ const NotificationCard = ({ notification }) => {
       }
     }
     if (notification.status === "accepted") {
-      return `${displayName} has accepted you a connection request.`;
+      if (notificationRecieved) {
+        return `You have accepted ${displayName}'s connection request.`;
+      } else {
+        return `${displayName} has accepted you a connection request.`;
+      }
+    }
+  };
+
+  const conditionalButtons = () => {
+    if (notification.status === "pending") {
+      if (notificationRecieved) {
+        return (
+          <div className={classes.buttonContainer}>
+            <Button
+              style={{ padding: "5px 9px" }}
+              variant="outlined"
+              color="primary"
+            >
+              Accept
+            </Button>
+            <Button
+              style={{ padding: "5px 9px" }}
+              variant="outlined"
+              color="secondary"
+            >
+              Decline
+            </Button>
+          </div>
+        );
+      } else {
+        return (
+          <Button
+            style={{ padding: "5px 9px" }}
+            variant="outlined"
+            color="secondary"
+          >
+            Decline
+          </Button>
+        );
+      }
     }
   };
 
   return (
     <Paper elevation={3} className={classes.root}>
       <Avatar alt="profile" src={photoURL} className={classes.avatar} />
-      <Typography variant="caption" className={classes.name} align="left">
+      <Typography
+        variant="caption"
+        className={classes.notificationBody}
+        align="left"
+      >
         {notificationBody()}
       </Typography>
+      {conditionalButtons()}
     </Paper>
   );
 };
