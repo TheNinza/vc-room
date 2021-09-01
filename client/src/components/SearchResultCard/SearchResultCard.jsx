@@ -1,6 +1,7 @@
 import { Avatar, makeStyles, Paper, Typography } from "@material-ui/core";
 
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { firestore, serverTimestamp } from "../../lib/firebase/firebase";
@@ -42,6 +43,39 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
   const classes = useStyles();
 
   const userData = useSelector((state) => state.user.userData);
+
+  const [showButtons, setShowButtons] = useState(false);
+
+  const findIfYouWantToShowButtons = useCallback(async () => {
+    try {
+      const notifQuery = firestore
+        .collection("notifications")
+        .where("from", "==", userData.uid)
+        .where("to", "==", uid)
+        .where("status", "==", "pending");
+
+      const notifRef = await notifQuery.get();
+
+      const userQuery = firestore
+        .collection("users")
+        .doc(userData.uid)
+        .collection("friends")
+        .where("uid", "==", uid);
+
+      const friendRef = await userQuery.get();
+
+      console.log(friendRef);
+
+      setShowButtons(!notifRef.empty && !friendRef.empty);
+    } catch (error) {
+      console.error(error);
+      toast.error("Some Network Error Occured");
+    }
+  }, [uid, userData]);
+
+  useEffect(() => {
+    findIfYouWantToShowButtons();
+  }, [findIfYouWantToShowButtons]);
 
   if (uid === userData.uid) {
     return null;
@@ -100,7 +134,9 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
         {" "}
         {displayName}{" "}
       </Typography>
-      <GroupAddIcon onClick={sendFriendReq} className={classes.callIcon} />
+      {showButtons && (
+        <GroupAddIcon onClick={sendFriendReq} className={classes.callIcon} />
+      )}
     </Paper>
   );
 };
