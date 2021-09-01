@@ -1,8 +1,9 @@
 import { makeStyles } from "@material-ui/styles";
 import { useState, useEffect } from "react";
-import { firestore } from "../../lib/firebase/firebase";
+import { firestore, serverTimestamp } from "../../lib/firebase/firebase";
 import { Avatar, Button, Paper, Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,6 +57,105 @@ const NotificationCard = ({ notification }) => {
     }
   }, [notification, notificationRecieved]);
 
+  // custom Functions
+
+  const acceptRequest = async () => {
+    try {
+      const batch = firestore.batch();
+
+      const timestamp = serverTimestamp();
+
+      const notifRef = firestore
+        .collection("notifications")
+        .doc(notification.notificationId);
+
+      const recieverNotificationRef = firestore
+        .collection("users")
+        .doc(notification.to)
+        .collection("notifications")
+        .doc(notification.notificationId);
+
+      const senderNotificationRef = firestore
+        .collection("users")
+        .doc(notification.from)
+        .collection("notifications")
+        .doc(notification.notificationId);
+
+      const recieverFriendsRef = firestore
+        .collection("users")
+        .doc(notification.to)
+        .collection("friends")
+        .doc(notification.from);
+
+      const senderFriendsRef = firestore
+        .collection("users")
+        .doc(notification.from)
+        .collection("friends")
+        .doc(notification.to);
+
+      batch.update(notifRef, {
+        status: "accepted",
+        lastModified: timestamp,
+      });
+
+      batch.update(senderNotificationRef, {
+        status: "accepted",
+      });
+
+      batch.update(recieverNotificationRef, {
+        status: "accepted",
+      });
+
+      batch.set(recieverFriendsRef, {
+        uid: recieverFriendsRef.id,
+      });
+
+      batch.set(senderFriendsRef, {
+        uid: senderFriendsRef.id,
+      });
+
+      await batch.commit();
+
+      toast.success(`${toUser.displayName} is now your connection.`);
+    } catch (error) {
+      toast.error("Can't accept request :(  !!");
+    }
+  };
+
+  const declineRequest = async () => {
+    try {
+      const batch = firestore.batch();
+
+      const notifRef = firestore
+        .collection("notifications")
+        .doc(notification.notificationId);
+
+      const recieverNotificationRef = firestore
+        .collection("users")
+        .doc(notification.to)
+        .collection("notifications")
+        .doc(notification.notificationId);
+
+      const senderNotificationRef = firestore
+        .collection("users")
+        .doc(notification.from)
+        .collection("notifications")
+        .doc(notification.notificationId);
+
+      batch.delete(notifRef);
+
+      batch.delete(senderNotificationRef);
+
+      batch.delete(recieverNotificationRef);
+
+      await batch.commit();
+
+      toast.success("Successfully declined request.");
+    } catch (error) {
+      toast.error("Can't decline request :(  !!");
+    }
+  };
+
   // conditional rendering functions
 
   const notificationBody = () => {
@@ -70,7 +170,7 @@ const NotificationCard = ({ notification }) => {
       if (notificationRecieved) {
         return `You have accepted ${displayName}'s connection request.`;
       } else {
-        return `${displayName} has accepted you a connection request.`;
+        return `${displayName} has accepted your connection request.`;
       }
     }
   };
@@ -84,6 +184,7 @@ const NotificationCard = ({ notification }) => {
               style={{ padding: "5px 9px" }}
               variant="outlined"
               color="primary"
+              onClick={acceptRequest}
             >
               Accept
             </Button>
@@ -91,6 +192,7 @@ const NotificationCard = ({ notification }) => {
               style={{ padding: "5px 9px" }}
               variant="outlined"
               color="secondary"
+              onClick={declineRequest}
             >
               Decline
             </Button>
@@ -102,6 +204,7 @@ const NotificationCard = ({ notification }) => {
             style={{ padding: "5px 9px" }}
             variant="outlined"
             color="secondary"
+            onClick={declineRequest}
           >
             Decline
           </Button>

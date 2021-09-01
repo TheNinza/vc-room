@@ -64,9 +64,9 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
 
       const friendRef = await userQuery.get();
 
-      console.log(friendRef);
+      console.log(friendRef, notifRef);
 
-      setShowButtons(!notifRef.empty && !friendRef.empty);
+      setShowButtons(notifRef.empty && friendRef.empty);
     } catch (error) {
       console.error(error);
       toast.error("Some Network Error Occured");
@@ -107,22 +107,27 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
         to: uid,
         status: "pending",
         createdAt: timeStamp,
+        lastModified: timeStamp,
       });
 
       batch.set(senderNotificationRef, {
         notificationId: notificationRef.id,
         status: "pending",
+        seen: false,
       });
 
       batch.set(recieverNotificationRef, {
         notificationId: notificationRef.id,
         status: "pending",
+        seen: false,
       });
 
       await batch.commit();
+      setShowButtons(false);
 
       toast.success("Friend Request Sent");
     } catch (error) {
+      setShowButtons(true);
       toast.error("Can't Send Friend Request");
     }
   };

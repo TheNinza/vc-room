@@ -76,6 +76,7 @@ const Navbar = (props) => {
         .doc(userData.uid)
         .collection("notifications")
         .where("status", "==", "pending")
+        .where("seen", "==", false)
         .onSnapshot((snapshot) => {
           dispatch(setNotificationCount(snapshot.docs.length));
         });

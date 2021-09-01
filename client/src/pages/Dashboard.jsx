@@ -45,7 +45,10 @@ const Dashboard = () => {
   useEffect(() => {
     let unsubscribe;
     if (uid) {
-      const query = firestore.collection("user").doc(uid).collection("friends");
+      const query = firestore
+        .collection("users")
+        .doc(uid)
+        .collection("friends");
 
       unsubscribe = query.onSnapshot((snapshot) => {
         const friends = snapshot.docs.map((doc) => doc.data());

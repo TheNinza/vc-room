@@ -11,7 +11,6 @@ import {
 import { firestore } from "../../lib/firebase/firebase";
 import debounce from "lodash.debounce";
 import toast from "react-hot-toast";
-import PanelFriendCard from "../PanelFriendCard/PanelFriendCard";
 import SearchResultCard from "../SearchResultCard/SearchResultCard";
 
 const useStyles = makeStyles((theme) => ({

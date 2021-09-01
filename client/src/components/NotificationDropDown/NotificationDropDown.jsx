@@ -59,6 +59,7 @@ const NotificationDropDown = ({ uid }) => {
 
               // by default, firebase server timestamp is not serialisable
               createdAt: data.createdAt?.toMillis() || 0,
+              lastModified: data.lastModified?.toMillis() || 0,
             });
           }
 
