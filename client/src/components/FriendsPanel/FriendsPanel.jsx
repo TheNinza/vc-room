@@ -5,8 +5,11 @@ import {
   TextField,
 } from "@material-ui/core";
 import GroupIcon from "@material-ui/icons/Group";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 import friendSvgSrc from "../../assets/friendsSearchWave.svg";
+import { firestore } from "../../lib/firebase/firebase";
 import PanelFriendCard from "../PanelFriendCard/PanelFriendCard";
 
 const useStyles = makeStyles((theme) => ({
@@ -60,6 +63,28 @@ const useStyles = makeStyles((theme) => ({
 
 const FriendsPanel = () => {
   const classes = useStyles();
+  const [searchString, setSearchString] = useState("");
+  const [searchData, setSearchData] = useState([]);
+  const friendsData = useSelector((state) => state.friends.friendsData);
+  const currentUserUid = useSelector((state) => state.user.userData.uid);
+
+  useEffect(() => {
+    if (searchString.length) {
+      firestore
+        .collection("users")
+        .where("displayName", ">=", searchString.toUpperCase())
+        .get()
+        .then((ref) => {
+          setSearchData(
+            ref.docs
+              .filter((doc) => doc.id !== currentUserUid)
+              .map((doc) => doc.data())
+          );
+        });
+    } else {
+      setSearchData([]);
+    }
+  }, [searchString]);
 
   return (
     <div className={classes.root}>
@@ -82,36 +107,24 @@ const FriendsPanel = () => {
                 notchedOutline: classes.smoothAnimation,
                 root: classes.textfield,
               },
+              value: searchString,
+              onChange: (e) => setSearchString(e.target.value),
             }}
           />
         </div>
 
         <div className={classes.friendsContainer}>
-          <PanelFriendCard
-            id="1"
-            image="https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-            name="Captain America"
-          />
-          <PanelFriendCard
-            id="1"
-            image="https://images.pexels.com/photos/2811087/pexels-photo-2811087.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-            name="Iron Man"
-          />
-          <PanelFriendCard
-            id="1"
-            image="https://images.pexels.com/photos/4407688/pexels-photo-4407688.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-            name="Spider Man"
-          />
-          <PanelFriendCard
-            id="1"
-            image="https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-            name="Thor"
-          />
-          <PanelFriendCard
-            id="1"
-            image="https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-            name="Black Widow"
-          />
+          {searchData.length
+            ? searchData.map((friend) => (
+                <PanelFriendCard
+                  searchData={true}
+                  friend={friend}
+                  key={friend.uid}
+                />
+              ))
+            : friendsData.map((friend) => (
+                <PanelFriendCard friend={friend} key={friend.uid} />
+              ))}
         </div>
       </Paper>
     </div>
