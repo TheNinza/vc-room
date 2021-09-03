@@ -84,7 +84,7 @@ const FriendsPanel = () => {
     } else {
       setSearchData([]);
     }
-  }, [searchString]);
+  }, [searchString, currentUserUid]);
 
   return (
     <div className={classes.root}>

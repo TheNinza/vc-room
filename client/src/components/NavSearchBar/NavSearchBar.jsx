@@ -41,6 +41,7 @@ const NavSearchBar = () => {
   const dispatch = useDispatch();
   const fullPageBlurred = useSelector((state) => state.ui.fullPageBlurred);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getSearchResults = useCallback(
     debounce(async (query) => {
       // setLoading(true);

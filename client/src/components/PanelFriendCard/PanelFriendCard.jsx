@@ -50,7 +50,7 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
         console.error(error);
       }
     }
-  }, [friend]);
+  }, [friend, userData]);
 
   useEffect(() => {
     if (isIntersecting && !searchData) {
@@ -58,7 +58,7 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
     } else if (searchData) {
       setUserData(friend);
     }
-  }, [isIntersecting, searchData]);
+  }, [isIntersecting, searchData, friend, getMoreUserDetails]);
 
   return (
     <Paper ref={ref} elevation={3} className={classes.root}>
