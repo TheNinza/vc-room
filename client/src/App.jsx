@@ -10,6 +10,7 @@ import Blurred from "./components/Blurred/Blurred";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CallPage = lazy(() => import("./pages/CallPage"));
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -60,6 +61,9 @@ const App = () => {
           </Route>
           <Route path="/dashboard" exact>
             {userData && !error ? <Dashboard /> : <Redirect to="/" />}
+          </Route>
+          <Route path="/call">
+            <CallPage />
           </Route>
         </Switch>
       </Suspense>
