@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 const useOnScreen = (ref) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
 
-  const observer = new IntersectionObserver(([entry]) =>
-    setIsIntersecting(entry.isIntersecting)
-  );
-
   useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) =>
+      setIsIntersecting(entry.isIntersecting)
+    );
     observer.observe(ref.current);
-  }, []);
+  }, [ref]);
   return isIntersecting;
 };
 

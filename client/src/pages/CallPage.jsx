@@ -5,9 +5,11 @@ import {
   Paper,
   Typography,
 } from "@material-ui/core";
-import endCallSource from "../assets/endCallIcon.svg";
 import incomingVideoSrc from "../assets/streamIncomingDummy.mp4";
 import outgoingVideoSrc from "../assets/streamOutgoingDummy.mp4";
+import MicIcon from "@material-ui/icons/Mic";
+import CallEndIcon from "@material-ui/icons/CallEnd";
+import VideocamIcon from "@material-ui/icons/Videocam";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,9 +58,11 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     marginTop: "2rem",
+    gap: "1rem",
   },
-  endCallImage: {
-    height: "5rem",
+  buttonIcon: {
+    width: "2rem",
+    height: "2rem",
   },
 }));
 
@@ -93,12 +97,41 @@ const CallPage = () => {
           </Paper>
         </div>
         <div className={classes.controlls}>
-          <Button color="secondary">
-            <img
-              className={classes.endCallImage}
-              src={endCallSource}
-              alt="end call"
-            />
+          <Button
+            style={{
+              borderRadius: "50%",
+              width: "4rem",
+              height: "4rem",
+              minWidth: "0px",
+            }}
+            variant="outlined"
+            color="primary"
+          >
+            <MicIcon className={classes.buttonIcon} />
+          </Button>
+          <Button
+            style={{
+              borderRadius: "50%",
+              width: "4rem",
+              height: "4rem",
+              minWidth: "0px",
+            }}
+            variant="outlined"
+            color="primary"
+          >
+            <VideocamIcon className={classes.buttonIcon} />
+          </Button>
+          <Button
+            style={{
+              borderRadius: "50%",
+              width: "4rem",
+              height: "4rem",
+              minWidth: "0px",
+            }}
+            variant="outlined"
+            color="secondary"
+          >
+            <CallEndIcon className={classes.buttonIcon} />
           </Button>
         </div>
       </div>
