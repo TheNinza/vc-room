@@ -6,10 +6,11 @@ import {
   Typography,
 } from "@material-ui/core";
 import incomingVideoSrc from "../assets/streamIncomingDummy.mp4";
-import outgoingVideoSrc from "../assets/streamOutgoingDummy.mp4";
 import MicIcon from "@material-ui/icons/Mic";
 import CallEndIcon from "@material-ui/icons/CallEnd";
 import VideocamIcon from "@material-ui/icons/Videocam";
+import useOnCall from "../hooks/useOnCall";
+import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,12 +30,14 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     gap: "2rem",
     height: "80%",
+    justifyContent: "center",
   },
   stream: {
     position: "relative",
     height: "100%",
     flex: 1,
     overflow: "hidden",
+    maxWidth: "700px",
     "& > video": {
       height: "100%",
       width: "100%",
@@ -68,31 +71,57 @@ const useStyles = makeStyles((theme) => ({
 
 const CallPage = () => {
   const classes = useStyles();
+  const userData = useSelector((state) => state?.user?.userData);
+
+  const { photoURL, displayName } = userData || {
+    photoURL: "",
+    displayName: "",
+  };
+  const {
+    localVideoRef,
+    remoteVideoRef,
+    callAcceptedByUser,
+    callDeclinedByUser,
+  } = useOnCall();
+
+  console.log({
+    localVideoRef,
+    remoteVideoRef,
+    callAcceptedByUser,
+    callDeclinedByUser,
+  });
 
   return (
     <div className={classes.root}>
       <div className={classes.callContainer}>
         <div className={classes.streams}>
+          {callAcceptedByUser && (
+            <Paper elevation={5} className={classes.stream}>
+              <video
+                ref={remoteVideoRef}
+                src={incomingVideoSrc}
+                autoPlay
+                loop
+              ></video>
+              <div className={classes.userInfo}>
+                <Avatar
+                  src="https://images.pexels.com/photos/3283568/pexels-photo-3283568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+                  alt="profilePhoto"
+                  className={classes.avatar}
+                />
+                <Typography variant="h6">Raechel Jain</Typography>
+              </div>
+            </Paper>
+          )}
           <Paper elevation={5} className={classes.stream}>
-            <video src={incomingVideoSrc} autoPlay loop></video>
+            <video ref={localVideoRef} autoPlay playsInline></video>
             <div className={classes.userInfo}>
               <Avatar
-                src="https://images.pexels.com/photos/3283568/pexels-photo-3283568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+                src={photoURL}
                 alt="profilePhoto"
                 className={classes.avatar}
               />
-              <Typography variant="h6">Raechel Jain</Typography>
-            </div>
-          </Paper>
-          <Paper elevation={5} className={classes.stream}>
-            <video src={outgoingVideoSrc} autoPlay loop></video>
-            <div className={classes.userInfo}>
-              <Avatar
-                src="https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
-                alt="profilePhoto"
-                className={classes.avatar}
-              />
-              <Typography variant="h6">Mike Ross</Typography>
+              <Typography variant="h6">{displayName}</Typography>
             </div>
           </Paper>
         </div>

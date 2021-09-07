@@ -1,7 +1,13 @@
 import { Avatar, makeStyles, Paper } from "@material-ui/core";
 import CallIcon from "@material-ui/icons/Call";
 import { useCallback, useEffect, useRef, useState } from "react";
-import useOnScreen from "../../app/hooks";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router";
+import useOnScreen from "../../hooks/useOnScreen";
+import {
+  setIsReceivingCall,
+  setUserOnOtherSide,
+} from "../../features/call/call-slice";
 import { firestore } from "../../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
@@ -37,6 +43,8 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   const ref = useRef();
 
   const isIntersecting = useOnScreen(ref);
+  const dispatch = useDispatch();
+  const history = useHistory();
 
   const getMoreUserDetails = useCallback(async () => {
     if (!userData) {
@@ -60,13 +68,18 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
     }
   }, [isIntersecting, searchData, friend, getMoreUserDetails]);
 
+  const handleCallClick = () => {
+    dispatch(setUserOnOtherSide(userData.uid));
+    dispatch(setIsReceivingCall(false));
+    history.push("/call");
+  };
   return (
     <Paper ref={ref} elevation={3} className={classes.root}>
       {userData && (
         <>
           <Avatar alt="profile" src={userData.photoURL} />
           <div className={classes.name}>{userData.displayName}</div>
-          <CallIcon className={classes.callIcon} />
+          <CallIcon onClick={handleCallClick} className={classes.callIcon} />
         </>
       )}
     </Paper>
