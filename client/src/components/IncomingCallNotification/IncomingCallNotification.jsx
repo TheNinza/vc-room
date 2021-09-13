@@ -78,8 +78,6 @@ const IncomingCallNotification = () => {
   };
   const handleAcceptCall = () => {
     handleClose();
-    dispatch(setIsReceivingCall(true));
-
     setTimeout(() => {
       history.push("/call");
     }, 1000);
@@ -90,6 +88,10 @@ const IncomingCallNotification = () => {
     const snapshot = await query.get();
     setCallingUser(snapshot.data());
   };
+
+  useEffect(() => {
+    dispatch(setIncomingCallDetails(null));
+  }, [dispatch]);
 
   useEffect(() => {
     if (incomingCallDetails) {
