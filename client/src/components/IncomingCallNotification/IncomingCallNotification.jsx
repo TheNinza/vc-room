@@ -77,7 +77,7 @@ const IncomingCallNotification = () => {
     setOpen(false);
   };
   const handleAcceptCall = () => {
-    handleClose();
+    setOpen(false);
     setTimeout(() => {
       history.push("/call");
     }, 1000);
