@@ -4,6 +4,8 @@ const INITIAL_STATE = {
   userOnOtherSide: null,
   isReceivingCall: false,
   incomingCallDetails: null,
+  callingStatus: false,
+  activeCall: null,
 };
 
 const callSlice = createSlice({
@@ -19,6 +21,15 @@ const callSlice = createSlice({
     setIncomingCallDetails: (state, { payload }) => {
       state.incomingCallDetails = payload;
     },
+    setCallingStatus: (state, { payload }) => {
+      state.callingStatus = true;
+    },
+    setActiveCall: (state, { payload }) => {
+      state.activeCall = payload;
+    },
+    resetCallDetails: (state) => {
+      return INITIAL_STATE;
+    },
   },
 });
 
@@ -26,5 +37,8 @@ export const {
   setUserOnOtherSide,
   setIsReceivingCall,
   setIncomingCallDetails,
+  setCallingStatus,
+  setActiveCall,
+  resetCallDetails,
 } = callSlice.actions;
 export default callSlice.reducer;

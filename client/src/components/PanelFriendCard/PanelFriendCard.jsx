@@ -1,10 +1,10 @@
-import { Avatar, makeStyles, Paper } from "@material-ui/core";
+import { Avatar, Button, makeStyles, Paper } from "@material-ui/core";
 import CallIcon from "@material-ui/icons/Call";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useHistory } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 import useOnScreen from "../../hooks/useOnScreen";
 import {
+  setCallingStatus,
   setIsReceivingCall,
   setUserOnOtherSide,
 } from "../../features/call/call-slice";
@@ -34,17 +34,21 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.secondary.main,
     },
   },
+  noPadding: {
+    padding: 0,
+  },
 }));
 
 const PanelFriendCard = ({ friend, searchData = false }) => {
   const classes = useStyles();
   const [userData, setUserData] = useState(null);
 
+  const callingStatus = useSelector((state) => state.call.callingStatus);
+
   const ref = useRef();
 
   const isIntersecting = useOnScreen(ref);
   const dispatch = useDispatch();
-  const history = useHistory();
 
   const getMoreUserDetails = useCallback(async () => {
     if (!userData) {
@@ -71,7 +75,7 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   const handleCallClick = () => {
     dispatch(setUserOnOtherSide(userData.uid));
     dispatch(setIsReceivingCall(false));
-    history.push("/call");
+    dispatch(setCallingStatus(true));
   };
   return (
     <Paper ref={ref} elevation={3} className={classes.root}>
@@ -79,7 +83,14 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
         <>
           <Avatar alt="profile" src={userData.photoURL} />
           <div className={classes.name}>{userData.displayName}</div>
-          <CallIcon onClick={handleCallClick} className={classes.callIcon} />
+          <Button
+            disableElevation
+            disabled={callingStatus}
+            className={classes.noPadding}
+            onClick={handleCallClick}
+          >
+            <CallIcon className={classes.callIcon} />
+          </Button>
         </>
       )}
     </Paper>

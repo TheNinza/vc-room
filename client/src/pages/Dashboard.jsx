@@ -1,5 +1,5 @@
-import { makeStyles } from "@material-ui/core";
-import { useEffect } from "react";
+import { makeStyles, Snackbar } from "@material-ui/core";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FriendsPanel from "../components/FriendsPanel/FriendsPanel";
 import IncomingCallNotification from "../components/IncomingCallNotification/IncomingCallNotification";
@@ -7,9 +7,15 @@ import RecentCallsContainer from "../components/RecentCallsContainer/RecentCalls
 import SuggestionsContainer from "../components/SuggestionsContainer/SuggestionsContainer";
 
 import UserPanel from "../components/UserPanel/UserPanel";
-import { setIncomingCallDetails } from "../features/call/call-slice";
+import {
+  resetCallDetails,
+  setActiveCall,
+  setIncomingCallDetails,
+} from "../features/call/call-slice";
 import { setFriends } from "../features/friends/friends-slice";
-import { firestore } from "../lib/firebase/firebase";
+import { firestore, serverTimestamp } from "../lib/firebase/firebase";
+import toast from "react-hot-toast";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: { flex: 1, display: "flex", position: "relative" },
@@ -40,8 +46,29 @@ const useStyles = makeStyles((theme) => ({
 const Dashboard = () => {
   const classes = useStyles();
 
+  // local States
+
+  const [callingSnackBarOpen, setCallingSnackBarOpen] = useState(false);
+
+  // Refs
+  const timerRef = useRef();
+  const unsubscribeFromCreateCallDocument = useRef();
+
+  // Redux
   const uid = useSelector((state) => state.user.userData.uid);
+  const callState = useSelector((state) => state.call);
   const dispatch = useDispatch();
+
+  // React-Router
+  const history = useHistory();
+
+  // reset timer
+  const clearTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   // start listenning to various collectoins related to user for realtime update and update redux store
   useEffect(() => {
@@ -75,6 +102,7 @@ const Dashboard = () => {
                 setIncomingCallDetails({
                   ...data,
                   timeStamp: data.timeStamp.toMillis(),
+                  callDocId: change.doc.id,
                 })
               );
             }
@@ -87,6 +115,78 @@ const Dashboard = () => {
       unsubscribeFromCallsCollection();
     };
   }, [uid, dispatch]);
+
+  const createCallDocument = useCallback(async (userOnOtherSide) => {
+    setCallingSnackBarOpen(true);
+    const callDoc = firestore.collection("calls").doc();
+    await callDoc.set({
+      userOnOtherSide: userOnOtherSide,
+      from: uid,
+      timeStamp: serverTimestamp(),
+      initiatorSignalData: null,
+      receiverSignalData: null,
+      callAccepted: false,
+      callDeclined: false,
+    });
+
+    unsubscribeFromCreateCallDocument.current = callDoc.onSnapshot(
+      (snapshot) => {
+        const callData = snapshot.data();
+        const { callAccepted, callDeclined } = callData;
+
+        if (callAccepted) {
+          clearTimer();
+          setCallingSnackBarOpen(false);
+          toast.success("Connecting Call");
+          dispatch(setActiveCall({ ...callData, callDocId: callDoc.id }));
+          history.push("/call");
+        }
+
+        if (callDeclined) {
+          clearTimer();
+          setCallingSnackBarOpen(false);
+          dispatch(resetCallDetails());
+          toast.error("Call Declined");
+        }
+      }
+    );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // start listenning to if call is being accepted
+  useEffect(() => {
+    clearTimer();
+    if (unsubscribeFromCreateCallDocument.current)
+      unsubscribeFromCreateCallDocument.current();
+
+    const { callingStatus, userOnOtherSide } = callState;
+
+    if (callingStatus && userOnOtherSide) {
+      timerRef.current = setTimeout(() => {
+        toast.error("Call not connected");
+        setCallingSnackBarOpen(false);
+        dispatch(resetCallDetails());
+      }, 10000);
+      createCallDocument(userOnOtherSide);
+    }
+
+    return () => {
+      clearTimer();
+      if (unsubscribeFromCreateCallDocument.current)
+        unsubscribeFromCreateCallDocument.current();
+    };
+  }, [callState, createCallDocument, dispatch]);
+
+  // listenner for resetting states
+
+  useEffect(() => {
+    if (history.action === "POP") {
+      dispatch(resetCallDetails());
+      setCallingSnackBarOpen(false);
+      clearTimer();
+    }
+  }, [dispatch, history]);
 
   return (
     <div className={classes.root}>
@@ -101,6 +201,7 @@ const Dashboard = () => {
         </div>
       </div>
       <IncomingCallNotification />
+      <Snackbar open={callingSnackBarOpen} message="Calling..." />
     </div>
   );
 };
