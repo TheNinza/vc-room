@@ -27,7 +27,7 @@ const callSlice = createSlice({
     setActiveCall: (state, { payload }) => {
       state.activeCall = payload;
     },
-    resetCallDetails: (state) => {
+    resetCallDetails: () => {
       return INITIAL_STATE;
     },
   },
