@@ -3,7 +3,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import Slide from "@material-ui/core/Slide";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  setIncomingCallDetails,
+  resetCallDetails,
   setIsReceivingCall,
 } from "../../features/call/call-slice";
 import {
@@ -73,15 +73,33 @@ const IncomingCallNotification = () => {
   };
 
   const handleClose = () => {
-    dispatch(setIncomingCallDetails(null));
+    dispatch(resetCallDetails());
     setOpen(false);
   };
-  const handleAcceptCall = () => {
+  const handleAcceptCall = async () => {
     dispatch(setIsReceivingCall(true));
     setOpen(false);
-    setTimeout(() => {
-      history.push("/call");
-    }, 1000);
+
+    const callDoc = firestore
+      .collection("calls")
+      .doc(incomingCallDetails.callDocId);
+
+    await callDoc.update({
+      callAccepted: true,
+    });
+    history.push("/call");
+  };
+
+  const handleDecline = async () => {
+    handleClose();
+
+    const callDoc = firestore
+      .collection("calls")
+      .doc(incomingCallDetails.callDocId);
+
+    await callDoc.update({
+      callDeclined: true,
+    });
   };
 
   const getUserFromId = async (uid) => {
@@ -91,7 +109,7 @@ const IncomingCallNotification = () => {
   };
 
   useEffect(() => {
-    dispatch(setIncomingCallDetails(null));
+    dispatch(resetCallDetails());
   }, [dispatch]);
 
   useEffect(() => {
@@ -108,6 +126,7 @@ const IncomingCallNotification = () => {
       TransitionComponent={transition}
       key={transition ? transition.name : ""}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      autoHideDuration={10000}
     >
       <Paper elevation={7} className={classes.root}>
         <Typography variant="h5" align="center" gutterBottom>
@@ -139,7 +158,7 @@ const IncomingCallNotification = () => {
                   style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
                   variant="outlined"
                   color="secondary"
-                  onClick={handleClose}
+                  onClick={handleDecline}
                 >
                   <ClearIcon style={{ fontSize: "3rem" }} />
                 </Button>

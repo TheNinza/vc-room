@@ -10,6 +10,7 @@ import UserPanel from "../components/UserPanel/UserPanel";
 import {
   resetCallDetails,
   setActiveCall,
+  setCallingStatus,
   setIncomingCallDetails,
 } from "../features/call/call-slice";
 import { setFriends } from "../features/friends/friends-slice";
@@ -98,6 +99,7 @@ const Dashboard = () => {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data();
             if (change.type === "added" && data?.timeStamp?.toMillis() > now) {
+              dispatch(setCallingStatus(true));
               dispatch(
                 setIncomingCallDetails({
                   ...data,
