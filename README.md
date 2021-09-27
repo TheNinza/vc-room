@@ -12,6 +12,23 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 ![Firebase](https://img.shields.io/badge/-Firebase-05122A?style=for-the-badge&logo=firebase)&nbsp;
 ![Redux](https://img.shields.io/badge/Redux-05122A?style=for-the-badge&logo=redux)&nbsp;
 ![React-Router](https://img.shields.io/badge/React_Router-05122A?style=for-the-badge&logo=react-router)&nbsp;
+![React-Router](https://img.shields.io/badge/Material--UI-05122A?style=for-the-badge&logo=material-ui)&nbsp;
+
+## Goals
+
+:white_check_mark: User SignIn.
+
+:white_check_mark: Friend Request.
+
+:white_check_mark: Friend List.
+
+:white_check_mark: Incomming Call And Outgoing Call Notifications.
+
+:white_check_mark: Incomming Call And Outgoing Call Notifications.
+
+:white_large_square: Creating Actual Video Call
+
+:white_large_square: Mobile Responsiveness
 
 ## Local Setup
 
