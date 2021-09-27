@@ -16,6 +16,8 @@ Make sure you follow the following steps while raising a PR.
 git checkout -b <GITHUB_USERNAME>
 ```
 
+<li>Use Material UI styling for any CSS stylling. </li>
+
 <li>Make sure to write quality code with proper comments. For formatting the code, use Prettier default options.</li>
 
 <li>Make sure to write descriptive commit messages.</li>
