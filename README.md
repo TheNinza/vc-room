@@ -16,19 +16,19 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 
 ## Goals
 
-:white_check_mark: User SignIn.
+:white_check_mark: &nbsp;User SignIn.
 
-:white_check_mark: Friend Request.
+:white_check_mark: &nbsp;Friend Request.
 
-:white_check_mark: Friend List.
+:white_check_mark: &nbsp;Friend List.
 
-:white_check_mark: Incomming Call And Outgoing Call Notifications.
+:white_check_mark: &nbsp;Incomming Call And Outgoing Call Notifications.
 
-:white_check_mark: Incomming Call And Outgoing Call Notifications.
+:white_check_mark: &nbsp;Incomming Call And Outgoing Call Notifications.
 
-:white_large_square: Creating Actual Video Call
+:white_large_square: &nbsp;Creating Actual Video Call
 
-:white_large_square: Mobile Responsiveness
+:white_large_square: &nbsp;Mobile Responsiveness
 
 ## Local Setup
 
