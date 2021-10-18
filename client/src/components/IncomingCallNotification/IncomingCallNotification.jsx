@@ -91,8 +91,6 @@ const IncomingCallNotification = () => {
   };
 
   const handleDecline = async () => {
-    handleClose();
-
     const callDoc = firestore
       .collection("calls")
       .doc(incomingCallDetails.callDocId);
@@ -100,6 +98,7 @@ const IncomingCallNotification = () => {
     await callDoc.update({
       callDeclined: true,
     });
+    handleClose();
   };
 
   const getUserFromId = async (uid) => {
