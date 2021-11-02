@@ -62,9 +62,8 @@ const IncomingCallNotification = () => {
   const [transition, setTransition] = useState(undefined);
   const [callingUser, setCallingUser] = useState(null);
 
-  const incomingCallDetails = useSelector(
-    (state) => state.call.incomingCallDetails
-  );
+  const activeCall = useSelector((state) => state.call.activeCall);
+  const isReceivingCall = useSelector((state) => state.call.isReceivingCall);
   const dispatch = useDispatch();
 
   const handleClick = (Transition) => () => {
@@ -80,9 +79,7 @@ const IncomingCallNotification = () => {
     dispatch(setIsReceivingCall(true));
     setOpen(false);
 
-    const callDoc = firestore
-      .collection("calls")
-      .doc(incomingCallDetails.callDocId);
+    const callDoc = firestore.collection("calls").doc(activeCall.callDocId);
 
     await callDoc.update({
       callAccepted: true,
@@ -91,9 +88,7 @@ const IncomingCallNotification = () => {
   };
 
   const handleDecline = async () => {
-    const callDoc = firestore
-      .collection("calls")
-      .doc(incomingCallDetails.callDocId);
+    const callDoc = firestore.collection("calls").doc(activeCall.callDocId);
 
     await callDoc.update({
       callDeclined: true,
@@ -112,11 +107,11 @@ const IncomingCallNotification = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (incomingCallDetails) {
+    if (isReceivingCall && activeCall) {
       handleClick(TransitionLeft)();
-      getUserFromId(incomingCallDetails.from);
+      getUserFromId(activeCall.from);
     }
-  }, [incomingCallDetails]);
+  }, [isReceivingCall, activeCall]);
 
   return (
     <Snackbar
@@ -125,7 +120,7 @@ const IncomingCallNotification = () => {
       TransitionComponent={transition}
       key={transition ? transition.name : ""}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      autoHideDuration={10000}
+      autoHideDuration={100000}
     >
       <Paper elevation={7} className={classes.root}>
         <Typography variant="h5" align="center" gutterBottom>

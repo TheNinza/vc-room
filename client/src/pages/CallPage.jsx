@@ -5,7 +5,6 @@ import {
   Paper,
   Typography,
 } from "@material-ui/core";
-import incomingVideoSrc from "../assets/streamIncomingDummy.mp4";
 import MicIcon from "@material-ui/icons/Mic";
 import CallEndIcon from "@material-ui/icons/CallEnd";
 import VideocamIcon from "@material-ui/icons/Videocam";
@@ -77,42 +76,29 @@ const CallPage = () => {
     photoURL: "",
     displayName: "",
   };
-  const {
-    localVideoRef,
-    remoteVideoRef,
-    callAcceptedByUser,
-    callDeclinedByUser,
-  } = useOnCall();
+  const { localVideoRef, remoteVideoRef } = useOnCall();
 
   console.log({
     localVideoRef,
     remoteVideoRef,
-    callAcceptedByUser,
-    callDeclinedByUser,
   });
 
   return (
     <div className={classes.root}>
       <div className={classes.callContainer}>
         <div className={classes.streams}>
-          {callAcceptedByUser && (
-            <Paper elevation={5} className={classes.stream}>
-              <video
-                ref={remoteVideoRef}
-                src={incomingVideoSrc}
-                autoPlay
-                loop
-              ></video>
-              <div className={classes.userInfo}>
-                <Avatar
-                  src="https://images.pexels.com/photos/3283568/pexels-photo-3283568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
-                  alt="profilePhoto"
-                  className={classes.avatar}
-                />
-                <Typography variant="h6">Raechel Jain</Typography>
-              </div>
-            </Paper>
-          )}
+          <Paper elevation={5} className={classes.stream}>
+            <video ref={remoteVideoRef} autoPlay playsInline></video>
+            <div className={classes.userInfo}>
+              <Avatar
+                src="https://images.pexels.com/photos/3283568/pexels-photo-3283568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+                alt="profilePhoto"
+                className={classes.avatar}
+              />
+              <Typography variant="h6">Raechel Jain</Typography>
+            </div>
+          </Paper>
+
           <Paper elevation={5} className={classes.stream}>
             <video ref={localVideoRef} autoPlay playsInline></video>
             <div className={classes.userInfo}>

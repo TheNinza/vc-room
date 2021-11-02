@@ -1,141 +1,128 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { firestore } from "../lib/firebase/firebase";
 import Peer from "simple-peer";
-import { firestore, serverTimestamp } from "../lib/firebase/firebase";
 
 const useOnCall = () => {
-  const { userOnOtherSide, isReceivingCall, incomingCallDetails } = useSelector(
-    (state) => state.call
-  );
-  const currentUserUid = useSelector((state) => state.user?.userData?.uid);
+  const callDocId = useSelector((state) => state.call.activeCall?.callDocId);
+  console.log(callDocId);
+  const isReceivingCall = useSelector((state) => state.call.isReceivingCall);
 
-  const [localStream, setLocalStream] = useState();
-  const [callAcceptedByUser, setCallAcceptedByUser] = useState(false);
-  const [callDeclinedByUser, setCallDeclinedByUser] = useState(false);
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
-  const peerConnectionRef = useRef();
-  const localStreamTracksRef = useRef();
 
-  const unsubscribeCreatingCallDocListner = useRef();
-  const unsubscribeAnsweringCallDocListner = useRef();
+  const localStreamRef = useRef();
+  const remoteStreamRef = useRef(new MediaStream());
+  const [stream, setStream] = useState();
+
+  const peerRef = useRef(new Peer());
 
   const getLocalStream = async () => {
-    console.log("getting local stream");
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    setLocalStream(stream);
+    setStream(stream);
     localVideoRef.current.srcObject = stream;
   };
 
-  const createNewCall = useCallback(async () => {
-    const callDoc = firestore.collection("calls").doc();
-    const peer = new Peer({ initiator: true, stream: localStream });
+  const handleRemoteStream = () => {};
 
-    peer.on("signal", async (data) => {
-      console.log("signalling", data);
-
-      await callDoc.set({
-        userOnOtherSide: userOnOtherSide,
-        initiatorSignalData: data,
-        from: currentUserUid,
-        timeStamp: serverTimestamp(),
-        callAccepted: false,
-        callDeclined: false,
-        receiverSignalData: null,
-      });
-    });
-
-    peer.on("stream", (remoteStream) => {
-      remoteVideoRef.current.srcObject = remoteStream;
-    });
-
-    unsubscribeCreatingCallDocListner.current = callDoc.onSnapshot(
-      (snapshot) => {
-        const { callAccepted, receiverSignalData, callDeclined } =
-          snapshot.data();
-        if (callDeclined) {
-          setCallDeclinedByUser(true);
-        }
-        if (callAccepted) {
-          setCallAcceptedByUser(true);
-          peer.signal(receiverSignalData);
-        }
-      }
-    );
-
-    peerConnectionRef.current = peer;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const answerCall = useCallback(async () => {
-    console.log("answering", incomingCallDetails);
-    const callDoc = firestore
-      .collection("calls")
-      .doc(incomingCallDetails.callDocId);
-
-    const peer = new Peer({ initiator: false, stream: localStream });
-
-    console.log(peer);
-
-    peer.on("signal", async (data) => {
-      console.log("data", data);
-      const a = await callDoc.update({
-        receiverSignalData: data,
-      });
-
-      console.log("result", a);
-    });
-
-    unsubscribeAnsweringCallDocListner.current = callDoc.onSnapshot(
-      (snapshot) => {
-        const { initiatorSignalData } = snapshot.data();
-        peer.signal(initiatorSignalData);
-      }
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // createCall
 
   useEffect(() => {
-    if (currentUserUid) {
-      getLocalStream();
-      if (!isReceivingCall) {
-        createNewCall();
-      } else {
-        answerCall();
-      }
-    }
+    // get local video stream
+    getLocalStream();
 
     return () => {
-      console.log("called");
-      peerConnectionRef.current?.destroy();
-      localStreamTracksRef.current?.forEach((track) => {
+      localStreamRef.current?.getTracks().forEach((track) => {
         track.stop();
       });
-      unsubscribeCreatingCallDocListner?.current &&
-        unsubscribeCreatingCallDocListner.current();
     };
-  }, [
-    createNewCall,
-    userOnOtherSide,
-    currentUserUid,
-    isReceivingCall,
-    answerCall,
-  ]);
+  }, []);
 
   useEffect(() => {
-    if (localStream) localStreamTracksRef.current = localStream.getTracks();
-  }, [localStream]);
+    if (callDocId && stream) {
+      console.log("streaaaaammm", stream);
+      if (isReceivingCall) {
+        peerRef.current = new Peer({
+          initiator: false,
+          trickle: true,
+          stream: stream,
+        });
+
+        peerRef.current.on("signal", (data) => {
+          console.log("sending data", data);
+
+          firestore
+            .collection("calls")
+            .doc(callDocId)
+            .collection("receiver")
+            .add(data);
+        });
+        firestore
+          .collection("calls")
+          .doc(callDocId)
+          .collection("sender")
+          .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === "added") {
+                const data = change.doc.data();
+                console.log("signalling data receiver", data);
+
+                peerRef.current.signal(data);
+              }
+            });
+          });
+
+        peerRef.current.on("stream", (stream) => {
+          console.log("stream received");
+          remoteVideoRef.current.srcObject = stream;
+        });
+      } else {
+        peerRef.current = new Peer({
+          initiator: true,
+          trickle: true,
+          stream: stream,
+        });
+
+        peerRef.current.on("signal", (data) => {
+          console.log("receiving data", data);
+
+          firestore
+            .collection("calls")
+            .doc(callDocId)
+            .collection("sender")
+            .add(data);
+        });
+        firestore
+          .collection("calls")
+          .doc(callDocId)
+          .collection("receiver")
+          .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === "added") {
+                const data = change.doc.data();
+                console.log("signalling data caller", data);
+
+                peerRef.current.signal(data);
+              }
+            });
+          });
+
+        peerRef.current.on("stream", (stream) => {
+          console.log("stream received");
+          remoteVideoRef.current.srcObject = stream;
+        });
+      }
+
+      console.log(peerRef.current);
+    }
+  }, [callDocId, isReceivingCall, stream]);
 
   return {
     localVideoRef,
     remoteVideoRef,
-    localStream,
-    callAcceptedByUser,
-    callDeclinedByUser,
   };
 };
 

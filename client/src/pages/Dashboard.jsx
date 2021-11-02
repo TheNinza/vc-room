@@ -11,7 +11,7 @@ import {
   resetCallDetails,
   setActiveCall,
   setCallingStatus,
-  setIncomingCallDetails,
+  setIsReceivingCall,
 } from "../features/call/call-slice";
 import { setFriends } from "../features/friends/friends-slice";
 import { firestore, serverTimestamp } from "../lib/firebase/firebase";
@@ -100,8 +100,9 @@ const Dashboard = () => {
             const data = change.doc.data();
             if (change.type === "added" && data?.timeStamp?.toMillis() > now) {
               dispatch(setCallingStatus(true));
+              dispatch(setIsReceivingCall(true));
               dispatch(
-                setIncomingCallDetails({
+                setActiveCall({
                   ...data,
                   timeStamp: data.timeStamp.toMillis(),
                   callDocId: change.doc.id,
@@ -140,7 +141,13 @@ const Dashboard = () => {
           clearTimer();
           setCallingSnackBarOpen(false);
           toast.success("Connecting Call");
-          dispatch(setActiveCall({ ...callData, callDocId: callDoc.id }));
+          dispatch(
+            setActiveCall({
+              ...callData,
+              callDocId: callDoc.id,
+              timeStamp: callData.timeStamp.toMillis(),
+            })
+          );
           history.push("/call");
         }
 
@@ -169,7 +176,7 @@ const Dashboard = () => {
         toast.error("Call not connected");
         setCallingSnackBarOpen(false);
         dispatch(resetCallDetails());
-      }, 10000);
+      }, 100000);
       createCallDocument(userOnOtherSide);
     }
 
