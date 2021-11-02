@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { firestore } from "../lib/firebase/firebase";
 import Peer from "simple-peer";
@@ -11,8 +11,6 @@ const useOnCall = () => {
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
 
-  const localStreamRef = useRef();
-  const remoteStreamRef = useRef(new MediaStream());
   const [stream, setStream] = useState();
 
   const peerRef = useRef(new Peer());
@@ -26,20 +24,16 @@ const useOnCall = () => {
     localVideoRef.current.srcObject = stream;
   };
 
-  const handleRemoteStream = () => {};
-
-  // createCall
-
   useEffect(() => {
     // get local video stream
     getLocalStream();
 
     return () => {
-      localStreamRef.current?.getTracks().forEach((track) => {
+      stream?.getTracks().forEach((track) => {
         track.stop();
       });
     };
-  }, []);
+  }, [stream]);
 
   useEffect(() => {
     if (callDocId && stream) {
