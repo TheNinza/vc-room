@@ -110,6 +110,9 @@ const IncomingCallNotification = () => {
     if (isReceivingCall && activeCall) {
       handleClick(TransitionLeft)();
       getUserFromId(activeCall.from);
+    } else {
+      setCallingUser(null);
+      setOpen(false);
     }
   }, [isReceivingCall, activeCall]);
 

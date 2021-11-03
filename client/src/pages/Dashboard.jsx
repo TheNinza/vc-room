@@ -1,5 +1,5 @@
 import { makeStyles, Snackbar } from "@material-ui/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FriendsPanel from "../components/FriendsPanel/FriendsPanel";
 import IncomingCallNotification from "../components/IncomingCallNotification/IncomingCallNotification";
@@ -14,11 +14,11 @@ import {
   setIsReceivingCall,
 } from "../features/call/call-slice";
 import { setFriends } from "../features/friends/friends-slice";
-import { firestore, serverTimestamp } from "../lib/firebase/firebase";
+import { firestore } from "../lib/firebase/firebase";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: { flex: 1, display: "flex", position: "relative" },
   flexParent: {
     display: "flex",
@@ -53,11 +53,10 @@ const Dashboard = () => {
 
   // Refs
   const timerRef = useRef();
-  const unsubscribeFromCreateCallDocument = useRef();
 
   // Redux
   const uid = useSelector((state) => state.user.userData.uid);
-  const callState = useSelector((state) => state.call);
+  const activeCallDocId = useSelector((state) => state.call.activeCallDocId);
   const dispatch = useDispatch();
 
   // React-Router
@@ -99,6 +98,10 @@ const Dashboard = () => {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data();
             if (change.type === "added" && data?.timeStamp?.toMillis() > now) {
+              console.log("incomming call", {
+                ...data,
+                timeStamp: data.timeStamp.toMillis(),
+              });
               dispatch(setCallingStatus(true));
               dispatch(setIsReceivingCall(true));
               dispatch(
@@ -119,83 +122,49 @@ const Dashboard = () => {
     };
   }, [uid, dispatch]);
 
-  const createCallDocument = useCallback(async (userOnOtherSide) => {
-    setCallingSnackBarOpen(true);
-    const callDoc = firestore.collection("calls").doc();
-    await callDoc.set({
-      userOnOtherSide: userOnOtherSide,
-      from: uid,
-      timeStamp: serverTimestamp(),
-      initiatorSignalData: null,
-      receiverSignalData: null,
-      callAccepted: false,
-      callDeclined: false,
-    });
-
-    unsubscribeFromCreateCallDocument.current = callDoc.onSnapshot(
-      (snapshot) => {
-        const callData = snapshot.data();
-        const { callAccepted, callDeclined } = callData;
-
-        if (callAccepted) {
-          clearTimer();
-          setCallingSnackBarOpen(false);
-          toast.success("Connecting Call");
-          dispatch(
-            setActiveCall({
-              ...callData,
-              callDocId: callDoc.id,
-              timeStamp: callData.timeStamp.toMillis(),
-            })
-          );
-          history.push("/call");
-        }
-
-        if (callDeclined) {
-          clearTimer();
-          setCallingSnackBarOpen(false);
-          dispatch(resetCallDetails());
-          toast.error("Call Declined");
-        }
-      }
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // start listenning to if call is being accepted
   useEffect(() => {
-    clearTimer();
-    if (unsubscribeFromCreateCallDocument.current)
-      unsubscribeFromCreateCallDocument.current();
+    let unsubscribeFromCreateCallDocument;
+    if (activeCallDocId) {
+      setCallingSnackBarOpen(true);
+      unsubscribeFromCreateCallDocument = firestore
+        .collection("calls")
+        .doc(activeCallDocId)
+        .onSnapshot((snapshot) => {
+          const callData = snapshot.data();
+          const { callAccepted, callDeclined } = callData;
 
-    const { callingStatus, userOnOtherSide } = callState;
+          if (callAccepted) {
+            clearTimer();
+            setCallingSnackBarOpen(false);
+            toast.success("Connecting Call");
+            dispatch(
+              setActiveCall({
+                ...callData,
+                callDocId: activeCallDocId,
+                timeStamp: callData.timeStamp.toMillis(),
+              })
+            );
+            history.push("/call");
+          }
 
-    if (callingStatus && userOnOtherSide) {
-      timerRef.current = setTimeout(() => {
-        toast.error("Call not connected");
-        setCallingSnackBarOpen(false);
-        dispatch(resetCallDetails());
-      }, 100000);
-      createCallDocument(userOnOtherSide);
+          if (callDeclined) {
+            clearTimer();
+            setCallingSnackBarOpen(false);
+            dispatch(resetCallDetails());
+            toast.error("Call Declined");
+          }
+        });
+    } else {
+      clearTimer();
+      dispatch(resetCallDetails());
+      setCallingSnackBarOpen(false);
     }
 
     return () => {
-      clearTimer();
-      if (unsubscribeFromCreateCallDocument.current)
-        unsubscribeFromCreateCallDocument.current();
+      unsubscribeFromCreateCallDocument && unsubscribeFromCreateCallDocument();
     };
-  }, [callState, createCallDocument, dispatch]);
-
-  // listenner for resetting states
-
-  useEffect(() => {
-    if (history.action === "POP") {
-      dispatch(resetCallDetails());
-      setCallingSnackBarOpen(false);
-      clearTimer();
-    }
-  }, [dispatch, history]);
+  }, [activeCallDocId, dispatch, history]);
 
   return (
     <div className={classes.root}>

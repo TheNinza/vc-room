@@ -3,11 +3,7 @@ import CallIcon from "@material-ui/icons/Call";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useOnScreen from "../../hooks/useOnScreen";
-import {
-  setCallingStatus,
-  setIsReceivingCall,
-  setUserOnOtherSide,
-} from "../../features/call/call-slice";
+import { createCall } from "../../features/call/call-slice";
 import { firestore } from "../../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
@@ -73,9 +69,7 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   }, [isIntersecting, searchData, friend, getMoreUserDetails]);
 
   const handleCallClick = () => {
-    dispatch(setUserOnOtherSide(userData.uid));
-    dispatch(setIsReceivingCall(false));
-    dispatch(setCallingStatus(true));
+    dispatch(createCall(userData.uid));
   };
   return (
     <Paper ref={ref} elevation={3} className={classes.root}>
