@@ -10,6 +10,8 @@ import CallEndIcon from "@material-ui/icons/CallEnd";
 import VideocamIcon from "@material-ui/icons/Videocam";
 import useOnCall from "../hooks/useOnCall";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { firestore } from "../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -74,18 +76,49 @@ const useStyles = makeStyles((theme) => ({
 const CallPage = () => {
   const classes = useStyles();
   const userData = useSelector((state) => state?.user?.userData);
+  const [otherUserData, setOtherUserData] = useState({
+    otherPhotoURL: "",
+    otherDisplayName: "",
+  });
 
   const { photoURL, displayName } = userData || {
     photoURL: "",
     displayName: "",
   };
-  const { localVideoRef, remoteVideoRef, isRemoteStreamAvailable, peerRef } =
-    useOnCall();
 
+  const { otherPhotoURL, otherDisplayName } = otherUserData || {
+    otherPhotoURL: "",
+    otherDisplayName: "",
+  };
+  const {
+    localVideoRef,
+    remoteVideoRef,
+    isRemoteStreamAvailable,
+    peerRef,
+    isReceivingCall,
+  } = useOnCall();
+
+  const activeCall = useSelector((state) => state.call.activeCall);
   console.log({
     localVideoRef,
     remoteVideoRef,
   });
+
+  useEffect(() => {
+    const otherUserId = isReceivingCall
+      ? activeCall.from
+      : activeCall.userOnOtherSide;
+
+    firestore
+      .collection("users")
+      .doc(otherUserId)
+      .get()
+      .then((doc) => {
+        const { photoURL: otherPhotoURL, displayName: otherDisplayName } =
+          doc.data();
+        setOtherUserData({ otherPhotoURL, otherDisplayName });
+      });
+  }, [activeCall, isReceivingCall]);
 
   return (
     <div className={classes.root}>
@@ -100,11 +133,11 @@ const CallPage = () => {
             <video ref={remoteVideoRef} autoPlay playsInline></video>
             <div className={classes.userInfo}>
               <Avatar
-                src="https://images.pexels.com/photos/3283568/pexels-photo-3283568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+                src={otherPhotoURL}
                 alt="profilePhoto"
                 className={classes.avatar}
               />
-              <Typography variant="h6">Raechel Jain</Typography>
+              <Typography variant="h6">{otherDisplayName}</Typography>
             </div>
           </Paper>
 

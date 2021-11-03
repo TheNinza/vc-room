@@ -160,6 +160,7 @@ const useOnCall = () => {
     remoteVideoRef,
     isRemoteStreamAvailable,
     peerRef,
+    isReceivingCall,
   };
 };
 
