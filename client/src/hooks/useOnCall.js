@@ -16,17 +16,24 @@ const useOnCall = () => {
   const peerRef = useRef(new Peer());
 
   const getLocalStream = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    setStream(stream);
-    localVideoRef.current.srcObject = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      setStream(stream);
+      localVideoRef.current.srcObject = stream;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     // get local video stream
-    getLocalStream();
+
+    if (!stream) {
+      getLocalStream();
+    }
 
     return () => {
       stream?.getTracks().forEach((track) => {
