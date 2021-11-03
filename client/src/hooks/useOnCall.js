@@ -2,14 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { firestore } from "../lib/firebase/firebase";
 import Peer from "simple-peer";
+import toast from "react-hot-toast";
+import { useHistory } from "react-router";
 
 const useOnCall = () => {
+  const history = useHistory();
   const callDocId = useSelector((state) => state.call.activeCall?.callDocId);
   console.log(callDocId);
   const isReceivingCall = useSelector((state) => state.call.isReceivingCall);
 
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
+
+  const [isRemoteStreamAvailable, setIsRemoteStreamAvailable] = useState(false);
 
   const [stream, setStream] = useState();
 
@@ -48,7 +53,7 @@ const useOnCall = () => {
       if (isReceivingCall) {
         peerRef.current = new Peer({
           initiator: false,
-          trickle: true,
+          trickle: false,
           stream: stream,
         });
 
@@ -67,7 +72,7 @@ const useOnCall = () => {
           .collection("sender")
           .onSnapshot((snapshot) => {
             snapshot.docChanges().forEach((change) => {
-              if (change.type === "added") {
+              if (change.type === "added" && !peerRef.current.destroyed) {
                 const data = change.doc.data();
                 console.log("signalling data receiver", data);
 
@@ -78,12 +83,15 @@ const useOnCall = () => {
 
         peerRef.current.on("stream", (stream) => {
           console.log("stream received");
+          console.log(peerRef.current);
+          setIsRemoteStreamAvailable(true);
+          toast.success("Connected Successfully");
           remoteVideoRef.current.srcObject = stream;
         });
       } else {
         peerRef.current = new Peer({
           initiator: true,
-          trickle: true,
+          trickle: false,
           stream: stream,
         });
 
@@ -102,7 +110,7 @@ const useOnCall = () => {
           .collection("receiver")
           .onSnapshot((snapshot) => {
             snapshot.docChanges().forEach((change) => {
-              if (change.type === "added") {
+              if (change.type === "added" && !peerRef.current.destroyed) {
                 const data = change.doc.data();
                 console.log("signalling data caller", data);
 
@@ -113,17 +121,45 @@ const useOnCall = () => {
 
         peerRef.current.on("stream", (stream) => {
           console.log("stream received");
+          setIsRemoteStreamAvailable(true);
+          toast.success("Connected Successfully");
+          console.log(peerRef.current);
           remoteVideoRef.current.srcObject = stream;
         });
       }
 
       console.log(peerRef.current);
+      peerRef.current.on("error", (event) => {
+        toast.error("Something bad happened, retry call");
+        history.push("/dashboard");
+      });
+      peerRef.current.on("close", () => {
+        toast.error("Disconnected");
+        history.push("/dashboard");
+      });
+      peerRef.current.addListener("end", () => {
+        toast.error("Disconnected");
+        history.push("/dashboard");
+      });
+      peerRef.current._pc.oniceconnectionstatechange = function () {
+        if (peerRef.current._pc.iceConnectionState === "disconnected") {
+          console.log("Disconnected");
+          history.push("/dashboard");
+        }
+      };
     }
-  }, [callDocId, isReceivingCall, stream]);
+
+    return () => {
+      peerRef.current.removeAllListeners();
+      peerRef.current.destroy();
+    };
+  }, [callDocId, isReceivingCall, stream, history]);
 
   return {
     localVideoRef,
     remoteVideoRef,
+    isRemoteStreamAvailable,
+    peerRef,
   };
 };
 

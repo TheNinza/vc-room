@@ -66,6 +66,9 @@ const useStyles = makeStyles((theme) => ({
     width: "2rem",
     height: "2rem",
   },
+  hiddenVideo: {
+    display: "none",
+  },
 }));
 
 const CallPage = () => {
@@ -76,7 +79,8 @@ const CallPage = () => {
     photoURL: "",
     displayName: "",
   };
-  const { localVideoRef, remoteVideoRef } = useOnCall();
+  const { localVideoRef, remoteVideoRef, isRemoteStreamAvailable, peerRef } =
+    useOnCall();
 
   console.log({
     localVideoRef,
@@ -87,7 +91,12 @@ const CallPage = () => {
     <div className={classes.root}>
       <div className={classes.callContainer}>
         <div className={classes.streams}>
-          <Paper elevation={5} className={classes.stream}>
+          <Paper
+            elevation={5}
+            className={`${
+              isRemoteStreamAvailable ? classes.stream : classes.hiddenVideo
+            }`}
+          >
             <video ref={remoteVideoRef} autoPlay playsInline></video>
             <div className={classes.userInfo}>
               <Avatar
@@ -145,6 +154,9 @@ const CallPage = () => {
             }}
             variant="outlined"
             color="secondary"
+            onClick={() => {
+              peerRef.current.destroy();
+            }}
           >
             <CallEndIcon className={classes.buttonIcon} />
           </Button>
