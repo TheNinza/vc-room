@@ -8,7 +8,9 @@ const useOnScreen = (ref) => {
     );
     observer.observe(ref.current);
 
-    return observer.disconnect;
+    return () => {
+      observer.disconnect();
+    };
   }, [ref]);
   return isIntersecting;
 };
