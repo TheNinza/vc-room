@@ -142,7 +142,8 @@ const CallPage = () => {
           </Paper>
 
           <Paper elevation={5} className={classes.stream}>
-            <video ref={localVideoRef} autoPlay playsInline></video>
+            {/* must mute own video to avoid feedback */}
+            <video ref={localVideoRef} muted autoPlay playsInline></video>
             <div className={classes.userInfo}>
               <Avatar
                 src={photoURL}
