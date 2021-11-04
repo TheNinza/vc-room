@@ -28,15 +28,15 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 
 :white_check_mark: &nbsp;Incomming Call And Outgoing Call Notifications.
 
-:white_large_square: &nbsp;Creating Actual Video Call
-
-:white_large_square: &nbsp;User Profile Page
-
-:white_large_square: &nbsp;Mobile Responsiveness
+:white_check_mark: &nbsp;Creating Actual Video Call
 
 :white_large_square: &nbsp;Recent Calls
 
+:white_large_square: &nbsp;Mobile Responsiveness
+
 :white_large_square: &nbsp;Friend Suggestions
+
+:white_large_square: &nbsp;User Profile Page
 
 ## Local Setup
 
