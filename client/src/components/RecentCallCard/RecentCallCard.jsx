@@ -1,6 +1,7 @@
 import {
   Avatar,
   Button,
+  CircularProgress,
   makeStyles,
   Paper,
   Typography,
@@ -8,6 +9,12 @@ import {
 import moment from "moment";
 import CallIcon from "@material-ui/icons/Call";
 import ClearIcon from "@material-ui/icons/Clear";
+import { useEffect, useRef, useState } from "react";
+import useOnScreen from "../../hooks/useOnScreen";
+import { firestore } from "../../lib/firebase/firebase";
+import { useDispatch } from "react-redux";
+import { createCall } from "../../features/call/call-slice";
+import toast from "react-hot-toast";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,52 +38,104 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     marginTop: "auto",
   },
+  loading: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    width: "100%",
+  },
 }));
 
-const RecentCallCard = ({ card: { name, id, image, time } }) => {
+const RecentCallCard = ({ card }) => {
   const classes = useStyles();
 
-  // helper functions
-  const generateTimeDifference = () => {
-    const currentTime = Date.now();
+  const cardRef = useRef();
+  const isOnScreen = useOnScreen(cardRef);
 
-    const hours = moment(currentTime).diff(moment(time), "hours");
-    if (hours > 0) return `${hours} hours`;
+  const [cardData, setCardData] = useState({ displayName: "", photoURL: "" });
 
-    const minutes = moment(currentTime).diff(moment(time), "minutes");
-    if (minutes > 0) return `${minutes} minutes`;
+  const dispatch = useDispatch();
 
-    const seconds = moment(currentTime).diff(moment(time), "seconds");
-    if (seconds > 0) return `${seconds} seconds`;
+  useEffect(() => {
+    let unsubscribe;
+    if (isOnScreen) {
+      unsubscribe = firestore
+        .collection("users")
+        .doc(card.userOnOtherSide)
+        .get()
+        .then((snapshot) => {
+          const { displayName, photoURL } = snapshot.data();
+          setCardData({ displayName, photoURL });
+        });
+    }
+    return unsubscribe;
+  }, [card, isOnScreen]);
+
+  const calculateTimeDiff = () => {
+    const units = ["year", "month", "day", "hour", "minute", "second"];
+
+    for (const unit of units) {
+      if (unit) {
+        const i = moment().diff(moment(card.timeStamp), unit);
+        if (!!i) {
+          return `${i} ${unit}${i > 1 ? "s" : ""} ago`;
+        }
+      }
+    }
   };
-  return (
-    <Paper elevation={6} className={classes.root}>
-      <Avatar alt="profile" src={image} className={classes.avatarImage} />
-      <Typography variant="h6">{name}</Typography>
-      <Typography color="textSecondary" variant="subtitle2">
-        {generateTimeDifference()} ago
-      </Typography>
 
-      <div className={classes.controls}>
-        <div className={classes.control}>
-          <Button
-            style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
-            variant="outlined"
-            color="primary"
-          >
-            <CallIcon style={{ fontSize: "2rem" }} />
-          </Button>
+  const handleCallClick = () => {
+    dispatch(createCall(card.userOnOtherSide));
+  };
+
+  const handleDelete = async () => {
+    await firestore.collection("calls").doc(card.id).delete();
+    toast.success("Deleted!!");
+  };
+
+  return (
+    <Paper ref={cardRef} elevation={6} className={classes.root}>
+      {cardData.displayName.length === 0 ? (
+        <div className={classes.loading}>
+          <CircularProgress />
         </div>
-        <div className={classes.control}>
-          <Button
-            style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
-            variant="outlined"
-            color="secondary"
-          >
-            <ClearIcon style={{ fontSize: "2rem" }} />
-          </Button>
-        </div>
-      </div>
+      ) : (
+        <>
+          <Avatar
+            alt="profile"
+            src={cardData.photoURL}
+            className={classes.avatarImage}
+          />
+          <Typography variant="h6">{cardData.displayName}</Typography>
+          <Typography color="textSecondary" variant="subtitle2">
+            {calculateTimeDiff()}
+          </Typography>
+
+          <div className={classes.controls}>
+            <div className={classes.control}>
+              <Button
+                style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
+                variant="outlined"
+                color="primary"
+                onClick={handleCallClick}
+              >
+                <CallIcon style={{ fontSize: "2rem" }} />
+              </Button>
+            </div>
+            <div className={classes.control}>
+              <Button
+                style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
+                variant="outlined"
+                color="secondary"
+                onClick={handleDelete}
+              >
+                <ClearIcon style={{ fontSize: "2rem" }} />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </Paper>
   );
 };
