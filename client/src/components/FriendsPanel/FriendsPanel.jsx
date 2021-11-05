@@ -5,12 +5,13 @@ import {
   TextField,
 } from "@material-ui/core";
 import GroupIcon from "@material-ui/icons/Group";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 import friendSvgSrc from "../../assets/friendsSearchWave.svg";
 import { firestore } from "../../lib/firebase/firebase";
 import PanelFriendCard from "../PanelFriendCard/PanelFriendCard";
+import debounce from "lodash.debounce";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,25 +67,41 @@ const FriendsPanel = () => {
   const [searchString, setSearchString] = useState("");
   const [searchData, setSearchData] = useState([]);
   const friendsData = useSelector((state) => state.friends.friendsData);
-  const currentUserUid = useSelector((state) => state.user.userData.uid);
 
-  useEffect(() => {
+  const getSearchData = async (searchString, friendsData) => {
+    let results = [];
     if (searchString.length) {
-      firestore
-        .collection("users")
-        .where("displayName", ">=", searchString.toUpperCase())
-        .get()
-        .then((ref) => {
-          setSearchData(
-            ref.docs
-              .filter((doc) => doc.id !== currentUserUid)
-              .map((doc) => doc.data())
-          );
-        });
+      for (let i = 0; i < friendsData.length; i++) {
+        const { uid } = friendsData[i];
+
+        const data = (
+          await firestore.collection("users").doc(uid).get()
+        ).data();
+
+        if (
+          data.displayName.toLowerCase().includes(searchString.toLowerCase())
+        ) {
+          results.push(data);
+        }
+      }
+      console.log(results);
+      setSearchData(results);
     } else {
       setSearchData([]);
     }
-  }, [searchString, currentUserUid]);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debounceSearch = useCallback(
+    debounce((a, b) => {
+      getSearchData(a, b);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    debounceSearch(searchString, friendsData);
+  }, [searchString, friendsData, debounceSearch]);
 
   return (
     <div className={classes.root}>
