@@ -107,9 +107,19 @@ app.get("/api/suggestions", async (req, res) => {
       }
     }
 
+    if (suggestionSet.size < 4) {
+      const query = firestore.collection("users").where("uid", "!=", uid);
+      const snapshot = await query.get();
+
+      snapshot.docs.forEach((doc) => {
+        if (!ownFriends.has(doc.id) && !suggestionSet.has(doc.id))
+          suggestionSet.add(doc.id);
+      });
+    }
+
     suggestions = Array.from(suggestionSet);
 
-    shuffle(suggestions);
+    shuffle(suggestions.slice(0, 10));
 
     res.status(200).json({
       suggestions,
