@@ -42,8 +42,46 @@ app.use(async (req, res, next) => {
 });
 
 // endpoints
-app.get("/", (req, res) => {
-  res.send("working");
+// app.get("/", (req, res) => {
+//   res.send("working");
+// });
+
+app.get("/", async (req, res) => {
+  let uid = "mpeW1ufoiKTtsGyPTJ3ofRMyKT62";
+
+  try {
+    let friends = await getFriendsOfTheUser(uid);
+    // set to contain friends
+    const ownFriends = new Set(friends);
+    ownFriends.add(uid);
+
+    const suggestionSet = new Set();
+
+    for (let i = 0; i < friends.length; i++) {
+      const friends2ndLevel = await getFriendsOfTheUser(friends[i]);
+
+      for (let j = 0; j < friends2ndLevel.length; j++) {
+        if (!ownFriends.has(friends2ndLevel[j])) {
+          suggestionSet.add(friends2ndLevel[j]);
+        }
+
+        const friends3rdLevel = await getFriendsOfTheUser(friends2ndLevel[j]);
+
+        for (let k = 0; k < friends3rdLevel.length; k++) {
+          if (!ownFriends.has(friends3rdLevel[k])) {
+            suggestionSet.add(friends3rdLevel[k]);
+          }
+        }
+      }
+    }
+
+    let suggestions = Array.from(suggestionSet);
+
+    res.send(suggestions);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ err });
+  }
 });
 
 // listner
@@ -52,3 +90,21 @@ const port = process.env.PORT || 8000;
 app.listen(port, () => {
   console.log(`Hello from port ${port}`);
 });
+
+/*************************
+ * Utility functions
+ *************************/
+
+async function getFriendsOfTheUser(uid) {
+  const query = await firestore
+    .collection("users")
+    .doc(uid)
+    .collection("friends");
+
+  const { docs } = await query.get();
+
+  const currentUserFriends = await Promise.all(
+    docs.map(async (doc) => (await doc.data()).uid)
+  );
+  return currentUserFriends;
+}
