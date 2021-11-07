@@ -8,8 +8,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "client": "cd client && npm start"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,7 @@
     "firebase-admin": "^10.0.0"
   },
   "devDependencies": {
+    "concurrently": "^6.3.0",
     "nodemon": "^2.0.14"
   }
 }

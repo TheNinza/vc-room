@@ -4,6 +4,15 @@ const cors = require("cors");
 const firebaseAdmin = require("firebase-admin");
 
 /**
+ * Defining globals
+ */
+
+const FRONT_END =
+  process.env.NODE_ENV === "production"
+    ? process.env.FRONT_END_PROD
+    : process.env.FRONT_END_DEV;
+
+/**
  * Firebase Admin Setup
  */
 const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
@@ -27,7 +36,7 @@ app.use(cors());
 app.use(express.json());
 
 // middleware to decode JWT for firebase auth
-app.use(async (req, res, next) => {
+app.use(async (req, _res, next) => {
   if (req.headers.authorization?.startsWith("Bearer ")) {
     const idToken = req.headers.authorization.split("Bearer ")[1];
 
@@ -42,20 +51,41 @@ app.use(async (req, res, next) => {
 });
 
 // endpoints
-// app.get("/", (req, res) => {
-//   res.send("working");
-// });
+app.get("/", (_req, res) => {
+  res.redirect(FRONT_END);
+});
 
-app.get("/", async (req, res) => {
-  let uid = "mpeW1ufoiKTtsGyPTJ3ofRMyKT62";
-
+app.get("/api/suggestions", async (req, res) => {
   try {
+    let { uid } = validateUser(req);
     let friends = await getFriendsOfTheUser(uid);
+    let suggestions = [];
+
+    // if user has no friends
+    if (!friends.length) {
+      const query = firestore
+        .collection("users")
+        .where("uid", "!=", uid)
+        .limit(10);
+      const snapshot = await query.get();
+
+      snapshot.docs.forEach((doc) => {
+        suggestions.push(doc.id);
+      });
+
+      return res.status(200).json({
+        suggestions,
+        message: "ok",
+      });
+    }
+
     // set to contain friends
     const ownFriends = new Set(friends);
     ownFriends.add(uid);
 
     const suggestionSet = new Set();
+
+    // traversing the freinds list and adding them to suggestions if not in suggestions already
 
     for (let i = 0; i < friends.length; i++) {
       const friends2ndLevel = await getFriendsOfTheUser(friends[i]);
@@ -64,6 +94,7 @@ app.get("/", async (req, res) => {
         if (!ownFriends.has(friends2ndLevel[j])) {
           suggestionSet.add(friends2ndLevel[j]);
         }
+        if (suggestionSet.size > 10) break;
 
         const friends3rdLevel = await getFriendsOfTheUser(friends2ndLevel[j]);
 
@@ -71,16 +102,24 @@ app.get("/", async (req, res) => {
           if (!ownFriends.has(friends3rdLevel[k])) {
             suggestionSet.add(friends3rdLevel[k]);
           }
+          if (suggestionSet.size > 10) break;
         }
       }
     }
 
-    let suggestions = Array.from(suggestionSet);
+    suggestions = Array.from(suggestionSet);
 
-    res.send(suggestions);
+    shuffle(suggestions);
+
+    res.status(200).json({
+      suggestions,
+      message: "ok",
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send({ err });
+    res
+      .status(400)
+      .send({ message: err?.message || "Some error occured", error: err });
   }
 });
 
@@ -107,4 +146,32 @@ async function getFriendsOfTheUser(uid) {
     docs.map(async (doc) => (await doc.data()).uid)
   );
   return currentUserFriends;
+}
+
+function validateUser(req) {
+  const user = req["currentUser"];
+  if (!user) {
+    throw new Error("You must be logged in to make this request!");
+  }
+  return user;
+}
+
+function shuffle(array) {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
 }
