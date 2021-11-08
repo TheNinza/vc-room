@@ -65,7 +65,6 @@ const SuggestionsContainer = () => {
   const classes = useStyles();
 
   const { data, isError, isLoading, refetch } = useGetSuggestionsQuery();
-  console.log(data);
 
   useEffect(() => {
     if (isError) {
