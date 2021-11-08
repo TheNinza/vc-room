@@ -8,6 +8,9 @@ import {
 } from "@material-ui/core";
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import { useRef, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { sendFriendRequest } from "../../features/friends/friends-slice";
 import useOnScreen from "../../hooks/useOnScreen";
 import { firestore } from "../../lib/firebase/firebase";
 
@@ -45,6 +48,8 @@ const useStyles = makeStyles((theme) => ({
 const SuggestionCard = ({ uid, refetch }) => {
   const classes = useStyles();
   const cardRef = useRef();
+  const dispatch = useDispatch();
+  const currentUserId = useSelector((state) => state.user.userData.uid);
 
   const isOnScreen = useOnScreen(cardRef);
   const [cardData, setCardData] = useState({
@@ -76,6 +81,17 @@ const SuggestionCard = ({ uid, refetch }) => {
   }, [isOnScreen, uid]);
 
   // helper functions
+  const sendFriendReq = async () => {
+    const dispatchObj = await dispatch(
+      sendFriendRequest({ friendUid: uid, uid: currentUserId })
+    );
+    if (dispatchObj.meta.requestStatus === "fulfilled") {
+      toast.success(dispatchObj.payload.message);
+      refetch();
+    } else {
+      toast.error(dispatchObj.payload.message);
+    }
+  };
   return (
     <Paper ref={cardRef} elevation={6} className={classes.root}>
       <Avatar
@@ -101,6 +117,7 @@ const SuggestionCard = ({ uid, refetch }) => {
               style={{ padding: "2px 8px", minWidth: 0 }}
               variant="outlined"
               color="primary"
+              onClick={sendFriendReq}
             >
               <GroupAddIcon />
             </Button>
