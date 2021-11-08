@@ -1,86 +1,13 @@
 import SuggestionCard from "../SuggestionCard/SuggestionCard";
-import { makeStyles, Typography } from "@material-ui/core";
+import { CircularProgress, makeStyles, Typography } from "@material-ui/core";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore, { Navigation } from "swiper/core";
 import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
 import "swiper/swiper.min.css";
 import "swiper/components/navigation/navigation.min.css";
-
-const dummyCards = [
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/4407688/pexels-photo-4407688.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Thor",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/2811087/pexels-photo-2811087.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Iron Man",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Captain America",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Captain Marvel",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Captain America",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Captain America",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Captain America",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-  {
-    id: "1",
-    image:
-      "https://images.pexels.com/photos/3170437/pexels-photo-3170437.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-    name: "Captain America",
-    time: "2021-08-21T06:24:46+0000",
-    status:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi, fugit.",
-  },
-];
+import { useGetSuggestionsQuery } from "../../features/suggestions-api/suggestions-api-slice";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 SwiperCore.use([Navigation]);
 
@@ -124,10 +51,27 @@ const useStyles = makeStyles((theme) => ({
       transform: "translate(0, -50%) scale(1.2)",
     },
   },
+  defaultHeight: {
+    width: "100%",
+    height: "18rem",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 }));
 
 const SuggestionsContainer = () => {
   const classes = useStyles();
+
+  const { data, isError, isLoading, refetch } = useGetSuggestionsQuery();
+  console.log(data);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error("Error Fetching Suggestions!!");
+    }
+  }, [isError]);
 
   return (
     <div className={classes.root}>
@@ -135,40 +79,63 @@ const SuggestionsContainer = () => {
         Suggestions
       </Typography>
 
-      <div className={classes.swiperContainer}>
-        <div className={`${classes.next} next2`}>
-          <PlayCircleFilledIcon fontSize="large" />
+      {isLoading ? (
+        <div className={classes.defaultHeight}>
+          <CircularProgress />
         </div>
-        <div className={`${classes.prev} prev2`}>
-          <PlayCircleFilledIcon
-            style={{ transform: "scale(-1)" }}
-            fontSize="large"
-          />
+      ) : data?.suggestions.length ? (
+        <div className={classes.swiperContainer}>
+          <div className={`${classes.next} next2`}>
+            <PlayCircleFilledIcon fontSize="large" />
+          </div>
+          <div className={`${classes.prev} prev2`}>
+            <PlayCircleFilledIcon
+              style={{ transform: "scale(-1)" }}
+              fontSize="large"
+            />
+          </div>
+          <Swiper
+            slidesPerView={1}
+            freeMode={true}
+            navigation={{ nextEl: ".next2", prevEl: ".prev2" }}
+            className="mySwiper"
+            breakpoints={{
+              640: {
+                slidesPerView: 2,
+              },
+              768: {
+                slidesPerView: 4,
+              },
+              1024: {
+                slidesPerView: 6,
+              },
+            }}
+          >
+            {data.suggestions.map((uid, idx) => (
+              <SwiperSlide
+                style={{ transform: "translateX(1.6rem)" }}
+                key={idx}
+              >
+                <SuggestionCard refetch={refetch} uid={uid} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
-        <Swiper
-          slidesPerView={1}
-          freeMode={true}
-          navigation={{ nextEl: ".next2", prevEl: ".prev2" }}
-          className="mySwiper"
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-            },
-            768: {
-              slidesPerView: 4,
-            },
-            1024: {
-              slidesPerView: 6,
-            },
-          }}
-        >
-          {dummyCards.map((card, idx) => (
-            <SwiperSlide style={{ transform: "translateX(1.6rem)" }} key={idx}>
-              <SuggestionCard card={card} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+      ) : (
+        <div className={classes.defaultHeight}>
+          <Typography
+            variant="h4"
+            align="center"
+            color="textSecondary"
+            gutterBottom
+          >
+            No suggestions for you at the moment
+          </Typography>
+          <Typography variant="h6" align="center" color="textSecondary">
+            Looks like you are an early user of the the platform. Welcome!
+          </Typography>
+        </div>
+      )}
     </div>
   );
 };
