@@ -3,8 +3,9 @@ import { Avatar, makeStyles, Paper, Typography } from "@material-ui/core";
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
-import { firestore, serverTimestamp } from "../../lib/firebase/firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { sendFriendRequest } from "../../features/friends/friends-slice";
+import { firestore } from "../../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,9 +43,9 @@ const useStyles = makeStyles((theme) => ({
 const SearchResultCard = ({ uid, displayName, photoURL }) => {
   const classes = useStyles();
 
-  const userData = useSelector((state) => state.user.userData);
-
   const [showButtons, setShowButtons] = useState(false);
+  const userData = useSelector((state) => state.user.userData);
+  const dispatch = useDispatch();
 
   const findIfYouWantToShowButtons = useCallback(async () => {
     try {
@@ -64,8 +65,6 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
 
       const friendRef = await userQuery.get();
 
-      console.log(friendRef, notifRef);
-
       setShowButtons(notifRef.empty && friendRef.empty);
     } catch (error) {
       console.error(error);
@@ -84,52 +83,17 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
   // custom functions
 
   const sendFriendReq = async () => {
-    try {
-      const batch = firestore.batch();
+    const dispatchObj = await dispatch(
+      sendFriendRequest({ friendUid: uid, uid: userData.uid })
+    );
 
-      const timeStamp = serverTimestamp();
-
-      const notificationRef = firestore.collection("notifications").doc();
-      const senderNotificationRef = firestore
-        .collection("users")
-        .doc(userData.uid)
-        .collection("notifications")
-        .doc(notificationRef.id);
-
-      const recieverNotificationRef = firestore
-        .collection("users")
-        .doc(uid)
-        .collection("notifications")
-        .doc(notificationRef.id);
-
-      batch.set(notificationRef, {
-        from: userData.uid,
-        to: uid,
-        status: "pending",
-        createdAt: timeStamp,
-        lastModified: timeStamp,
-      });
-
-      batch.set(senderNotificationRef, {
-        notificationId: notificationRef.id,
-        status: "pending",
-        seen: false,
-      });
-
-      batch.set(recieverNotificationRef, {
-        notificationId: notificationRef.id,
-        status: "pending",
-        seen: false,
-      });
-
-      await batch.commit();
-      setShowButtons(false);
-
-      toast.success("Friend Request Sent");
-    } catch (error) {
-      setShowButtons(true);
-      toast.error("Can't Send Friend Request");
+    if (dispatchObj.meta.requestStatus === "fulfilled") {
+      toast.success(dispatchObj.payload.message);
+    } else {
+      toast.error(dispatchObj.payload.message);
     }
+
+    findIfYouWantToShowButtons();
   };
 
   return (
