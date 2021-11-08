@@ -83,6 +83,18 @@ app.get("/api/suggestions", async (req, res) => {
     const ownFriends = new Set(friends);
     ownFriends.add(uid);
 
+    // check if there are any pending requests from user to any user
+    const notifQuery = firestore
+      .collection("notifications")
+      .where("from", "==", uid)
+      .where("status", "==", "pending");
+
+    (await notifQuery.get()).docs.forEach((doc) => {
+      ownFriends.add(doc.data().to);
+    });
+
+    // let's start creating suggestions
+
     const suggestionSet = new Set();
 
     // traversing the freinds list and adding them to suggestions if not in suggestions already
@@ -107,6 +119,7 @@ app.get("/api/suggestions", async (req, res) => {
       }
     }
 
+    // adding more suggestions for those who aren't in the list
     if (suggestionSet.size < 4) {
       const query = firestore.collection("users").where("uid", "!=", uid);
       const snapshot = await query.get();
