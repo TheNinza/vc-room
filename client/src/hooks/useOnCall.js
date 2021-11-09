@@ -8,7 +8,6 @@ import { useHistory } from "react-router";
 const useOnCall = () => {
   const history = useHistory();
   const callDocId = useSelector((state) => state.call.activeCall?.callDocId);
-  console.log(callDocId);
   const isReceivingCall = useSelector((state) => state.call.isReceivingCall);
 
   const localVideoRef = useRef();
@@ -18,7 +17,32 @@ const useOnCall = () => {
 
   const [stream, setStream] = useState();
 
+  const [isRemoteStreamVideoEnabled, setIsRemoteStreamVideoEnabled] =
+    useState(true);
+
   const peerRef = useRef(new Peer());
+
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+
+  const toggleAudio = () => {
+    if (stream) {
+      stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
+      setIsAudioEnabled(stream.getAudioTracks()[0].enabled);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (stream) {
+      stream.getVideoTracks()[0].enabled = !stream.getVideoTracks()[0].enabled;
+      setIsVideoEnabled(stream.getVideoTracks()[0].enabled);
+      peerRef.current.send(
+        JSON.stringify({
+          isVideoEnabled: stream.getVideoTracks()[0].enabled,
+        })
+      );
+    }
+  };
 
   const getLocalStream = async () => {
     try {
@@ -49,7 +73,6 @@ const useOnCall = () => {
 
   useEffect(() => {
     if (callDocId && stream) {
-      console.log("streaaaaammm", stream);
       if (isReceivingCall) {
         peerRef.current = new Peer({
           initiator: false,
@@ -58,8 +81,6 @@ const useOnCall = () => {
         });
 
         peerRef.current.on("signal", (data) => {
-          console.log("sending data", data);
-
           firestore
             .collection("calls")
             .doc(callDocId)
@@ -74,7 +95,6 @@ const useOnCall = () => {
             snapshot.docChanges().forEach((change) => {
               if (change.type === "added" && !peerRef.current.destroyed) {
                 const data = change.doc.data();
-                console.log("signalling data receiver", data);
 
                 peerRef.current.signal(data);
               }
@@ -82,8 +102,7 @@ const useOnCall = () => {
           });
 
         peerRef.current.on("stream", (stream) => {
-          console.log("stream received");
-          console.log(peerRef.current);
+          console.log("Stream Received");
           setIsRemoteStreamAvailable(true);
           toast.success("Connected Successfully");
           remoteVideoRef.current.srcObject = stream;
@@ -96,8 +115,6 @@ const useOnCall = () => {
         });
 
         peerRef.current.on("signal", (data) => {
-          console.log("receiving data", data);
-
           firestore
             .collection("calls")
             .doc(callDocId)
@@ -112,7 +129,6 @@ const useOnCall = () => {
             snapshot.docChanges().forEach((change) => {
               if (change.type === "added" && !peerRef.current.destroyed) {
                 const data = change.doc.data();
-                console.log("signalling data caller", data);
 
                 peerRef.current.signal(data);
               }
@@ -120,15 +136,17 @@ const useOnCall = () => {
           });
 
         peerRef.current.on("stream", (stream) => {
-          console.log("stream received");
+          console.log("Stream Received");
           setIsRemoteStreamAvailable(true);
           toast.success("Connected Successfully");
-          console.log(peerRef.current);
           remoteVideoRef.current.srcObject = stream;
         });
       }
-
-      console.log(peerRef.current);
+      peerRef.current.on("data", (data) => {
+        const string = new TextDecoder().decode(data);
+        const object = JSON.parse(string);
+        setIsRemoteStreamVideoEnabled(object.isVideoEnabled);
+      });
       peerRef.current.on("error", (event) => {
         toast.error("Something bad happened, retry call");
         history.push("/dashboard");
@@ -143,7 +161,6 @@ const useOnCall = () => {
       });
       peerRef.current._pc.oniceconnectionstatechange = function () {
         if (peerRef.current._pc.iceConnectionState === "disconnected") {
-          console.log("Disconnected");
           history.push("/dashboard");
         }
       };
@@ -161,6 +178,11 @@ const useOnCall = () => {
     isRemoteStreamAvailable,
     peerRef,
     isReceivingCall,
+    toggleAudio,
+    toggleVideo,
+    isAudioEnabled,
+    isVideoEnabled,
+    isRemoteStreamVideoEnabled,
   };
 };
 

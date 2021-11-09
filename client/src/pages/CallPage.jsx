@@ -57,6 +57,22 @@ const useStyles = makeStyles((theme) => ({
     gap: "1rem",
     alignItems: "center",
   },
+  mutedVideoUserInfo: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "1rem",
+  },
+  mutedVideoAvatar: {
+    height: 100,
+    width: 100,
+  },
   controlls: {
     width: "100%",
     display: "flex",
@@ -70,6 +86,15 @@ const useStyles = makeStyles((theme) => ({
   },
   hiddenVideo: {
     display: "none",
+  },
+  strikeThrough: {
+    clipPath: "polygon(95% 0, 100% 5%, 5% 100%, 0 95%)",
+    background: theme.palette.secondary.main,
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    top: 0,
+    left: 0,
   },
 }));
 
@@ -96,13 +121,14 @@ const CallPage = () => {
     isRemoteStreamAvailable,
     peerRef,
     isReceivingCall,
+    toggleAudio,
+    toggleVideo,
+    isAudioEnabled,
+    isVideoEnabled,
+    isRemoteStreamVideoEnabled,
   } = useOnCall();
 
   const activeCall = useSelector((state) => state.call.activeCall);
-  console.log({
-    localVideoRef,
-    remoteVideoRef,
-  });
 
   useEffect(() => {
     const otherUserId = isReceivingCall
@@ -131,11 +157,19 @@ const CallPage = () => {
             }`}
           >
             <video ref={remoteVideoRef} autoPlay playsInline></video>
-            <div className={classes.userInfo}>
+            <div
+              className={
+                isRemoteStreamVideoEnabled
+                  ? classes.userInfo
+                  : classes.mutedVideoUserInfo
+              }
+            >
               <Avatar
                 src={otherPhotoURL}
                 alt="profilePhoto"
-                className={classes.avatar}
+                className={
+                  isRemoteStreamVideoEnabled ? "" : classes.mutedVideoAvatar
+                }
               />
               <Typography variant="h6">{otherDisplayName}</Typography>
             </div>
@@ -144,11 +178,15 @@ const CallPage = () => {
           <Paper elevation={5} className={classes.stream}>
             {/* must mute own video to avoid feedback */}
             <video ref={localVideoRef} muted autoPlay playsInline></video>
-            <div className={classes.userInfo}>
+            <div
+              className={
+                isVideoEnabled ? classes.userInfo : classes.mutedVideoUserInfo
+              }
+            >
               <Avatar
                 src={photoURL}
                 alt="profilePhoto"
-                className={classes.avatar}
+                className={isVideoEnabled ? "" : classes.mutedVideoAvatar}
               />
               <Typography variant="h6">{displayName}</Typography>
             </div>
@@ -161,11 +199,16 @@ const CallPage = () => {
               width: "4rem",
               height: "4rem",
               minWidth: "0px",
+              position: "relative",
+              overflow: "hidden",
             }}
             variant="outlined"
-            color="primary"
+            color={isAudioEnabled ? "primary" : "secondary"}
+            onClick={toggleAudio}
+            disableElevation={!isAudioEnabled}
           >
             <MicIcon className={classes.buttonIcon} />
+            <div className={isAudioEnabled ? "" : classes.strikeThrough}></div>
           </Button>
           <Button
             style={{
@@ -173,11 +216,16 @@ const CallPage = () => {
               width: "4rem",
               height: "4rem",
               minWidth: "0px",
+              position: "relative",
+              overflow: "hidden",
             }}
             variant="outlined"
-            color="primary"
+            color={isVideoEnabled ? "primary" : "secondary"}
+            onClick={toggleVideo}
+            disableElevation={!isVideoEnabled}
           >
             <VideocamIcon className={classes.buttonIcon} />
+            <div className={isVideoEnabled ? "" : classes.strikeThrough}></div>
           </Button>
           <Button
             style={{
