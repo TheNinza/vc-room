@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const { auth, firestore } = require("./configs/firebase.js");
 const { decodeJWT } = require("./middlewares/decodeJWT.js");
 const suggestionsRoutes = require("./routes/suggestions.js");
 const { FRONT_END } = require("./configs/environments.js");
