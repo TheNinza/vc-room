@@ -20,9 +20,14 @@ app.get("/", (_req, res) => {
   res.redirect(FRONT_END);
 });
 
+app.get("/api/ping", (_req, res) => {
+  res.send("pong");
+});
+
 app.use("/api/suggestions", require("./routes/suggestions.js"));
 app.use("/api/friends", require("./routes/friends.js"));
 app.use("/api/search", require("./routes/search.js"));
+app.use("/api/call", require("./routes/call.js"));
 
 // listner
 const port = process.env.PORT || 8000;
