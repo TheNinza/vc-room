@@ -9,5 +9,6 @@ const firestoreApp = firebaseAdmin.initializeApp({
 
 const auth = firestoreApp.auth();
 const firestore = firestoreApp.firestore();
+const serverTimestamp = firebaseAdmin.firestore.FieldValue.serverTimestamp;
 
-module.exports = { auth, firestore };
+module.exports = { auth, firestore, serverTimestamp };

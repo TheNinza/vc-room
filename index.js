@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const { decodeJWT } = require("./middlewares/decodeJWT.js");
-const suggestionsRoutes = require("./routes/suggestions.js");
 const { FRONT_END } = require("./configs/environments.js");
 
 /**
@@ -21,7 +20,8 @@ app.get("/", (_req, res) => {
   res.redirect(FRONT_END);
 });
 
-app.use("/api/suggestions", suggestionsRoutes);
+app.use("/api/suggestions", require("./routes/suggestions.js"));
+app.use("/api/friends", require("./routes/friends.js"));
 
 // listner
 const port = process.env.PORT || 8000;
