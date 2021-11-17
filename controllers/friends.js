@@ -6,29 +6,33 @@ exports.sendFriendRequest = async (req, res) => {
     const { uid } = validateUser(req);
     const { friendUid } = req.body;
     if (!friendUid) {
-      throw new Error("Friend UID is required");
+      return res.status(400).json({ message: "Friend UID is required" });
     }
 
     // check if the user has already sent a friend request to the friend
     const query = firestore
       .collection("notifications")
       .where("from", "==", uid)
-      .where("to", "==", friendUid);
+      .where("to", "==", friendUid)
+      .where("status", "==", "pending");
     const querySnapshot = await query.get();
-    if (querySnapshot.empty) {
-      throw new Error("You have already sent a friend request to this user");
+    if (!querySnapshot.empty) {
+      return res.status(400).json({
+        message: "You have already sent a friend request to this user",
+      });
     }
 
     // check if the user has already received a friend request from the friend
     const query2 = firestore
       .collection("notifications")
       .where("from", "==", friendUid)
-      .where("to", "==", uid);
+      .where("to", "==", uid)
+      .where("status", "==", "pending");
     const querySnapshot2 = await query2.get();
-    if (querySnapshot2.empty) {
-      throw new Error(
-        "You have already received a friend request from this user"
-      );
+    if (!querySnapshot2.empty) {
+      return res.status(400).json({
+        message: "You have already received a friend request from this user",
+      });
     }
 
     // create a new friend request
@@ -74,14 +78,21 @@ exports.sendFriendRequest = async (req, res) => {
       message: "Successfully sent request",
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 exports.acceptFriendRequest = async (req, res) => {
   try {
     const { uid } = validateUser(req);
-    const { friendUid } = req.body;
+    const { friendUid, notifId } = req.body;
+
+    // check if the body is valid
+    if (!friendUid || !notifId) {
+      return res.status(400).json({
+        message: "Friend UID and Notification ID are required",
+      });
+    }
 
     // check if user is already friends with the friend
 
@@ -92,7 +103,9 @@ exports.acceptFriendRequest = async (req, res) => {
       .where("uid", "==", friendUid);
     const querySnapshot = await query.get();
     if (!querySnapshot.empty) {
-      throw new Error("You are already friends with this user");
+      return res.status(400).json({
+        message: "You are already friends with this user",
+      });
     }
 
     // check if the friend is already friends with the user
@@ -104,28 +117,38 @@ exports.acceptFriendRequest = async (req, res) => {
       .where("uid", "==", uid);
     const querySnapshot2 = await query2.get();
     if (!querySnapshot2.empty) {
-      throw new Error("This user is already friends with you");
-    }
-
-    // check if the user has already sent a friend request to the friend
-    const query3 = firestore
-      .collection("notifications")
-      .where("from", "==", uid)
-      .where("to", "==", friendUid);
-    const querySnapshot3 = await query3.get();
-    if (querySnapshot3.empty) {
-      throw new Error("You have not sent a friend request to this user");
+      return res.status(500).json({
+        message: "This user is already friends with you",
+      });
     }
 
     // check if the user has already received a friend request from the friend
 
-    const query4 = firestore
+    const query3 = firestore
       .collection("notifications")
       .where("from", "==", friendUid)
-      .where("to", "==", uid);
+      .where("to", "==", uid)
+      .where("status", "==", "pending");
+    const querySnapshot3 = await query3.get();
+
+    if (querySnapshot3.empty) {
+      return res.status(400).json({
+        message: "You have not received a friend request from this user",
+      });
+    }
+
+    // check if the notifId is valid
+
+    const query4 = firestore.collection("notifications").doc(notifId);
+
     const querySnapshot4 = await query4.get();
-    if (querySnapshot4.empty) {
-      throw new Error("You have not received a friend request from this user");
+    if (
+      querySnapshot3.docs.filter((doc) => doc.id === notifId).length === 0 ||
+      !querySnapshot4.exists
+    ) {
+      return res.status(400).json({
+        message: "Notification ID is invalid",
+      });
     }
 
     // update the friend request status to accepted
@@ -134,33 +157,31 @@ exports.acceptFriendRequest = async (req, res) => {
 
     const timestamp = serverTimestamp();
 
-    const notifRef = firestore
-      .collection("notifications")
-      .doc(notification.notificationId);
+    const notifRef = firestore.collection("notifications").doc(notifId);
 
     const recieverNotificationRef = firestore
       .collection("users")
-      .doc(notification.to)
+      .doc(uid)
       .collection("notifications")
-      .doc(notification.notificationId);
+      .doc(notifId);
 
     const senderNotificationRef = firestore
       .collection("users")
-      .doc(notification.from)
+      .doc(friendUid)
       .collection("notifications")
-      .doc(notification.notificationId);
+      .doc(notifId);
 
     const recieverFriendsRef = firestore
       .collection("users")
-      .doc(notification.to)
+      .doc(uid)
       .collection("friends")
-      .doc(notification.from);
+      .doc(friendUid);
 
     const senderFriendsRef = firestore
       .collection("users")
-      .doc(notification.from)
+      .doc(friendUid)
       .collection("friends")
-      .doc(notification.to);
+      .doc(uid);
 
     batch.update(notifRef, {
       status: "accepted",
@@ -184,7 +205,12 @@ exports.acceptFriendRequest = async (req, res) => {
     });
 
     await batch.commit();
+
+    res.status(200).json({
+      message: "Successfully accepted request",
+    });
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -192,57 +218,78 @@ exports.acceptFriendRequest = async (req, res) => {
 exports.declineFriendRequest = async (req, res) => {
   try {
     const { uid } = validateUser(req);
-    const { friendUid } = req.body;
+    const { friendUid, notifId } = req.body;
+
+    // check if the body is valid
+    if (!friendUid || !notifId) {
+      return res.status(400).json({
+        message: "Friend UID and Notification ID are required",
+      });
+    }
 
     // check if the user has already received a friend request from the friend
     const query2 = firestore
       .collection("notifications")
       .where("from", "==", friendUid)
-      .where("to", "==", uid);
+      .where("to", "==", uid)
+      .where("status", "==", "pending");
     const querySnapshot2 = await query2.get();
 
-    const hasReceivedRequest = querySnapshot2.empty;
+    const hasReceivedRequest =
+      !querySnapshot2.empty &&
+      querySnapshot2.docs.filter((doc) => doc.id === notifId).length > 0;
 
-    if (!hasReceivedRequest) {
-      throw new Error("You have not received a friend request from this user");
+    // check if the user has already sent a friend request to the friend
+    const query3 = firestore
+      .collection("notifications")
+      .where("from", "==", uid)
+      .where("to", "==", friendUid)
+      .where("status", "==", "pending");
+    const querySnapshot3 = await query3.get();
+
+    const hasSentRequest =
+      !querySnapshot3.empty &&
+      querySnapshot3.docs.filter((doc) => doc.id === notifId).length > 0;
+
+    if (!hasReceivedRequest && !hasSentRequest) {
+      return res.status(400).json({
+        message:
+          "You have not received or sent a friend request from this user",
+      });
     }
 
-    // update the friend request status to declined
+    // delete the friend request
 
     const batch = firestore.batch();
 
-    const timestamp = serverTimestamp();
-
-    const notifRef = firestore
-      .collection("notifications")
-      .doc(notification.notificationId);
+    const notifRef = firestore.collection("notifications").doc(notifId);
 
     const recieverNotificationRef = firestore
       .collection("users")
-      .doc(notification.to)
+      .doc(uid)
       .collection("notifications")
-      .doc(notification.notificationId);
+      .doc(notifId);
 
+    recieverNotificationRef
+      .get()
+      .then((doc) => console.log("exist: ", doc.exists));
     const senderNotificationRef = firestore
       .collection("users")
-      .doc(notification.from)
+      .doc(friendUid)
       .collection("notifications")
-      .doc(notification.notificationId);
+      .doc(notifId);
 
-    batch.update(notifRef, {
-      status: "declined",
-      lastModified: timestamp,
-    });
+    batch.delete(notifRef);
 
-    batch.update(senderNotificationRef, {
-      status: "declined",
-    });
+    batch.delete(senderNotificationRef);
 
-    batch.update(recieverNotificationRef, {
-      status: "declined",
-    });
+    batch.delete(recieverNotificationRef);
 
     await batch.commit();
+
+    res.status(200).json({
+      message: "Successfully declined request",
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -63,6 +63,10 @@ const NotificationDropDown = ({ uid }) => {
             });
           }
 
+          array.sort((a, b) => {
+            return b.lastModified - a.lastModified;
+          });
+
           dispatch(setNotifications(array));
         });
     }

@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NavSearchBar from "../NavSearchBar/NavSearchBar";
 import NotificationDropDown from "../NotificationDropDown/NotificationDropDown";
 import { setNotificationCount } from "../../features/notifications/notifications-slice";
+import { suggestionsApi } from "../../features/suggestions-api/suggestions-api-slice";
 
 const ElevationScroll = (props) => {
   const { children, window } = props;
@@ -79,6 +80,11 @@ const Navbar = (props) => {
         .where("seen", "==", false)
         .onSnapshot((snapshot) => {
           dispatch(setNotificationCount(snapshot.docs.length));
+          // forcing refetching of suggestions when updating notifications
+          const { refetch } = dispatch(
+            suggestionsApi.endpoints.getSuggestions.initiate()
+          );
+          refetch();
         });
     }
     return unsubscribe;

@@ -1,9 +1,12 @@
 import { makeStyles } from "@material-ui/styles";
 import { useState, useEffect } from "react";
-import { firestore, serverTimestamp } from "../../lib/firebase/firebase";
+import { firestore } from "../../lib/firebase/firebase";
 import { Avatar, Button, Paper, Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
-import toast from "react-hot-toast";
+import {
+  useAcceptFriendRequestMutation,
+  useDeclineFriendRequestMutation,
+} from "../../features/friends-api/friends-api-slice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -37,6 +40,9 @@ const NotificationCard = ({ notification }) => {
 
   const notificationRecieved = !!(currentUserUID === notification.to);
 
+  const [acceptReq] = useAcceptFriendRequestMutation();
+  const [declineReq] = useDeclineFriendRequestMutation();
+
   const { photoURL, displayName } = toUser
     ? toUser
     : { photoURL: "", displayName: "" };
@@ -59,101 +65,18 @@ const NotificationCard = ({ notification }) => {
 
   // custom Functions
 
-  const acceptRequest = async () => {
-    try {
-      const batch = firestore.batch();
-
-      const timestamp = serverTimestamp();
-
-      const notifRef = firestore
-        .collection("notifications")
-        .doc(notification.notificationId);
-
-      const recieverNotificationRef = firestore
-        .collection("users")
-        .doc(notification.to)
-        .collection("notifications")
-        .doc(notification.notificationId);
-
-      const senderNotificationRef = firestore
-        .collection("users")
-        .doc(notification.from)
-        .collection("notifications")
-        .doc(notification.notificationId);
-
-      const recieverFriendsRef = firestore
-        .collection("users")
-        .doc(notification.to)
-        .collection("friends")
-        .doc(notification.from);
-
-      const senderFriendsRef = firestore
-        .collection("users")
-        .doc(notification.from)
-        .collection("friends")
-        .doc(notification.to);
-
-      batch.update(notifRef, {
-        status: "accepted",
-        lastModified: timestamp,
-      });
-
-      batch.update(senderNotificationRef, {
-        status: "accepted",
-      });
-
-      batch.update(recieverNotificationRef, {
-        status: "accepted",
-      });
-
-      batch.set(recieverFriendsRef, {
-        uid: recieverFriendsRef.id,
-      });
-
-      batch.set(senderFriendsRef, {
-        uid: senderFriendsRef.id,
-      });
-
-      await batch.commit();
-
-      toast.success(`${toUser.displayName} is now your connection.`);
-    } catch (error) {
-      toast.error("Can't accept request :(  !!");
-    }
+  const acceptRequest = () => {
+    acceptReq({
+      friendUid: notification.from,
+      notifId: notification.notificationId,
+    });
   };
 
-  const declineRequest = async () => {
-    try {
-      const batch = firestore.batch();
-
-      const notifRef = firestore
-        .collection("notifications")
-        .doc(notification.notificationId);
-
-      const recieverNotificationRef = firestore
-        .collection("users")
-        .doc(notification.to)
-        .collection("notifications")
-        .doc(notification.notificationId);
-
-      const senderNotificationRef = firestore
-        .collection("users")
-        .doc(notification.from)
-        .collection("notifications")
-        .doc(notification.notificationId);
-
-      batch.delete(notifRef);
-
-      batch.delete(senderNotificationRef);
-
-      batch.delete(recieverNotificationRef);
-
-      await batch.commit();
-
-      toast.success("Successfully declined request.");
-    } catch (error) {
-      toast.error("Can't decline request :(  !!");
-    }
+  const declineRequest = () => {
+    declineReq({
+      friendUid: notificationRecieved ? notification.from : notification.to,
+      notifId: notification.notificationId,
+    });
   };
 
   // conditional rendering functions

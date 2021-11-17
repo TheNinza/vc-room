@@ -3,8 +3,9 @@ import { Avatar, makeStyles, Paper, Typography } from "@material-ui/core";
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
-import { sendFriendRequest } from "../../features/friends/friends-slice";
+import { useSelector } from "react-redux";
+import { useSendFriendRequestMutation } from "../../features/friends-api/friends-api-slice";
+// import { sendFriendRequest } from "../../features/friends/friends-slice";
 import { firestore } from "../../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +46,9 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
 
   const [showButtons, setShowButtons] = useState(false);
   const userData = useSelector((state) => state.user.userData);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
+
+  const [sendReq] = useSendFriendRequestMutation();
 
   const findIfYouWantToShowButtons = useCallback(async () => {
     try {
@@ -83,15 +86,7 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
   // custom functions
 
   const sendFriendReq = async () => {
-    const dispatchObj = await dispatch(
-      sendFriendRequest({ friendUid: uid, uid: userData.uid })
-    );
-
-    if (dispatchObj.meta.requestStatus === "fulfilled") {
-      toast.success(dispatchObj.payload.message);
-    } else {
-      toast.error(dispatchObj.payload.message);
-    }
+    await sendReq({ friendUid: uid });
 
     findIfYouWantToShowButtons();
   };
