@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { decodeJWT } = require("./middlewares/decodeJWT.js");
 const { FRONT_END } = require("./configs/environments.js");
+const morgan = require("morgan");
 
 /**
  * Express setup
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(decodeJWT);
+app.use(morgan("dev"));
 
 // endpoints
 app.get("/", (_req, res) => {
