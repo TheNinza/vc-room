@@ -4,7 +4,14 @@ const { validateUser } = require("../utils/validateUser");
 exports.people = async (req, res) => {
   try {
     const { uid } = validateUser(req);
-    const { searchString } = req.body;
+    const { searchString } = req.query;
+
+    // check if searchString is empty
+    if (!searchString) {
+      return res.status(400).json({
+        message: "Please enter a search string",
+      });
+    }
 
     const query = firestore
       .collection("users")
@@ -66,7 +73,7 @@ exports.people = async (req, res) => {
       users: filteredUsers,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       message: "Internal server error",
     });

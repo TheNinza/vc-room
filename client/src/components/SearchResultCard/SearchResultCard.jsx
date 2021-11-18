@@ -1,12 +1,7 @@
 import { Avatar, makeStyles, Paper, Typography } from "@material-ui/core";
-
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
-import { useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useSendFriendRequestMutation } from "../../features/friends-api/friends-api-slice";
-// import { sendFriendRequest } from "../../features/friends/friends-slice";
-import { firestore } from "../../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,43 +36,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SearchResultCard = ({ uid, displayName, photoURL }) => {
+const SearchResultCard = ({
+  uid = "",
+  displayName = "",
+  photoURL = "",
+  isFriend = false,
+}) => {
   const classes = useStyles();
 
-  const [showButtons, setShowButtons] = useState(false);
   const userData = useSelector((state) => state.user.userData);
-  // const dispatch = useDispatch();
 
   const [sendReq] = useSendFriendRequestMutation();
-
-  const findIfYouWantToShowButtons = useCallback(async () => {
-    try {
-      const notifQuery = firestore
-        .collection("notifications")
-        .where("from", "==", userData.uid)
-        .where("to", "==", uid)
-        .where("status", "==", "pending");
-
-      const notifRef = await notifQuery.get();
-
-      const userQuery = firestore
-        .collection("users")
-        .doc(userData.uid)
-        .collection("friends")
-        .where("uid", "==", uid);
-
-      const friendRef = await userQuery.get();
-
-      setShowButtons(notifRef.empty && friendRef.empty);
-    } catch (error) {
-      console.error(error);
-      toast.error("Some Network Error Occured");
-    }
-  }, [uid, userData]);
-
-  useEffect(() => {
-    findIfYouWantToShowButtons();
-  }, [findIfYouWantToShowButtons]);
 
   if (uid === userData.uid) {
     return null;
@@ -86,9 +55,7 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
   // custom functions
 
   const sendFriendReq = async () => {
-    await sendReq({ friendUid: uid });
-
-    findIfYouWantToShowButtons();
+    sendReq({ friendUid: uid });
   };
 
   return (
@@ -98,7 +65,7 @@ const SearchResultCard = ({ uid, displayName, photoURL }) => {
         {" "}
         {displayName}{" "}
       </Typography>
-      {showButtons && (
+      {!isFriend && (
         <GroupAddIcon onClick={sendFriendReq} className={classes.callIcon} />
       )}
     </Paper>
