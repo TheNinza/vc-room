@@ -1,5 +1,5 @@
-import { makeStyles, Snackbar } from "@material-ui/core";
-import { useEffect, useRef, useState } from "react";
+import { makeStyles } from "@material-ui/core";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FriendsPanel from "../components/FriendsPanel/FriendsPanel";
 import IncomingCallNotification from "../components/IncomingCallNotification/IncomingCallNotification";
@@ -49,10 +49,9 @@ const Dashboard = () => {
 
   // local States
 
-  const [callingSnackBarOpen, setCallingSnackBarOpen] = useState(false);
-
   // Refs
   const timerRef = useRef();
+  const toastRef = useRef();
 
   // Redux
   const uid = useSelector((state) => state.user.userData.uid);
@@ -67,6 +66,10 @@ const Dashboard = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
+    }
+    if (toastRef.current) {
+      toast.dismiss(toastRef.current);
+      toastRef.current = null;
     }
   };
 
@@ -123,8 +126,21 @@ const Dashboard = () => {
   useEffect(() => {
     let unsubscribeFromCreateCallDocument;
     if (activeCallDocId) {
+      // create a loading toast for calling
+      toastRef.current = toast.loading("Calling...", {
+        position: "bottom-center",
+      });
+
+      // set a timeout for 25 secs to reset the call
+      timerRef.current = setTimeout(() => {
+        clearTimer();
+        dispatch(resetCallDetails());
+
+        toast.error("Call Timed Out");
+      }, 25000);
+
       dispatch(setCallingStatus(true));
-      setCallingSnackBarOpen(true);
+
       unsubscribeFromCreateCallDocument = firestore
         .collection("calls")
         .doc(activeCallDocId)
@@ -134,7 +150,7 @@ const Dashboard = () => {
 
           if (callAccepted) {
             clearTimer();
-            setCallingSnackBarOpen(false);
+
             toast.success("Connecting Call");
             dispatch(
               setActiveCall({
@@ -148,22 +164,14 @@ const Dashboard = () => {
 
           if (callDeclined) {
             clearTimer();
-            setCallingSnackBarOpen(false);
+
             dispatch(resetCallDetails());
             toast.error("Call Declined");
           }
-
-          // set a timeout for 25 secs to reset the call
-          timerRef.current = setTimeout(() => {
-            dispatch(resetCallDetails());
-            setCallingSnackBarOpen(false);
-            toast.error("Call Timed Out");
-          }, 25000);
         });
     } else {
       clearTimer();
       dispatch(resetCallDetails());
-      setCallingSnackBarOpen(false);
     }
 
     return () => {
@@ -184,7 +192,6 @@ const Dashboard = () => {
         </div>
       </div>
       <IncomingCallNotification />
-      <Snackbar open={callingSnackBarOpen} message="Calling..." />
     </div>
   );
 };

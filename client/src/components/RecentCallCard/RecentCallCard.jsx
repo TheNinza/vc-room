@@ -61,8 +61,8 @@ const RecentCallCard = ({ card }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    let unsubscribe;
-    if (isOnScreen) {
+    let unsubscribe = () => {};
+    if (isOnScreen && !cardData.displayName.length) {
       unsubscribe = firestore
         .collection("users")
         .doc(card.isCaller ? card.userOnOtherSide : card.from)
@@ -70,10 +70,13 @@ const RecentCallCard = ({ card }) => {
         .then((snapshot) => {
           const { displayName, photoURL } = snapshot.data();
           setCardData({ displayName, photoURL });
+        })
+        .catch((error) => {
+          console.error(error);
         });
     }
     return unsubscribe;
-  }, [card, isOnScreen]);
+  }, [card, isOnScreen, cardData]);
 
   const calculateTimeDiff = () => {
     const units = ["year", "month", "day", "hour", "minute", "second"];
@@ -89,7 +92,7 @@ const RecentCallCard = ({ card }) => {
   };
 
   const handleCallClick = () => {
-    dispatch(createCall(card.userOnOtherSide));
+    dispatch(createCall(card.isCaller ? card.userOnOtherSide : card.from));
   };
 
   const handleDelete = async () => {
