@@ -154,6 +154,13 @@ const Dashboard = () => {
             dispatch(resetCallDetails());
             toast.error("Call Declined");
           }
+
+          // set a timeout for 25 secs to reset the call
+          timerRef.current = setTimeout(() => {
+            dispatch(resetCallDetails());
+            setCallingSnackBarOpen(false);
+            toast.error("Call Timed Out");
+          }, 25000);
         });
     } else {
       clearTimer();

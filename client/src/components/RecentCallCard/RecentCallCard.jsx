@@ -90,8 +90,12 @@ const RecentCallCard = ({ card }) => {
   };
 
   const handleDelete = async () => {
-    await firestore.collection("calls").doc(card.id).delete();
-    toast.success("Deleted!!");
+    try {
+      await firestore.collection("calls").doc(card.id).delete();
+      toast.success("Deleted!!");
+    } catch (error) {
+      toast.error("Error deleting call");
+    }
   };
 
   return (
