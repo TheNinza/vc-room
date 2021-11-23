@@ -8,10 +8,9 @@ import {
   disableFullPageBlur,
   enableFullPageBlur,
 } from "../../features/ui/ui-slice";
-import { firestore } from "../../lib/firebase/firebase";
 import debounce from "lodash.debounce";
-import toast from "react-hot-toast";
 import SearchResultCard from "../SearchResultCard/SearchResultCard";
+import { useGetSearchResultsPeopleQuery } from "../../features/search-api/search-api-slice";
 
 const useStyles = makeStyles((theme) => ({
   searchbar: {
@@ -34,50 +33,34 @@ const useStyles = makeStyles((theme) => ({
 
 const NavSearchBar = () => {
   const classes = useStyles();
-  const [searchString, setSearchString] = useState("");
-  const [searchResult, setSearchResult] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [debouncedSearchString, setDebouncedSearchString] = useState("");
+
+  const { data = { users: [] } } = useGetSearchResultsPeopleQuery(
+    debouncedSearchString,
+    {
+      skip: !debouncedSearchString.length,
+    }
+  );
 
   const dispatch = useDispatch();
   const fullPageBlurred = useSelector((state) => state.ui.fullPageBlurred);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getSearchResults = useCallback(
-    debounce(async (query) => {
-      // setLoading(true);
-      try {
-        const result = await query.get();
-        const data = result.docs.map((doc) => {
-          const { displayName, photoURL, uid } = doc.data();
-          return { displayName, photoURL, uid };
-        });
-        setSearchResult(data);
-      } catch (error) {
-        console.log(error);
-        toast.error("Error Fetching Data!!!!");
-        setSearchResult([]);
-      }
-
-      // setLoading(false);
+  const setDebouncedSearchStringFunction = useCallback(
+    debounce((value) => {
+      setDebouncedSearchString(value);
     }, 500),
     []
-  ); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const query = firestore
-      .collection("users")
-      .where("displayName", ">=", searchString.toUpperCase());
-
-    searchString.length ? getSearchResults(query) : setSearchResult([]);
-  }, [searchString, getSearchResults]);
+  );
 
   useEffect(() => {
     if (showResults) {
       dispatch(enableFullPageBlur());
-    } else if (!showResults && !searchString.length) {
+    } else if (!showResults && !debouncedSearchString.length) {
       dispatch(disableFullPageBlur());
     }
-  }, [showResults, searchString, dispatch]);
+  }, [showResults, debouncedSearchString, dispatch]);
 
   return (
     <>
@@ -86,7 +69,7 @@ const NavSearchBar = () => {
         variant="outlined"
         placeholder="Search People"
         margin="dense"
-        onChange={(e) => setSearchString(e.target.value)}
+        onChange={(e) => setDebouncedSearchStringFunction(e.target.value)}
         InputProps={{
           endAdornment: (
             <InputAdornment position="start">
@@ -96,7 +79,6 @@ const NavSearchBar = () => {
           classes: {
             notchedOutline: classes.smoothAnimation,
           },
-          value: searchString,
           onFocus: () => setShowResults(true),
           onBlur: () => setShowResults(false),
         }}
@@ -104,12 +86,13 @@ const NavSearchBar = () => {
 
       <div className={classes.searchContainer}>
         {fullPageBlurred
-          ? searchResult.map((r, idx) => (
+          ? data.users.map((user, idx) => (
               <SearchResultCard
-                uid={r.uid}
-                displayName={r.displayName}
-                photoURL={r.photoURL}
+                uid={user.uid}
+                displayName={user.displayName}
+                photoURL={user.photoURL}
                 key={idx}
+                isFriend={user.isFriend}
               />
             ))
           : ""}

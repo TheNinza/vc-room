@@ -123,7 +123,7 @@ const IncomingCallNotification = () => {
       TransitionComponent={transition}
       key={transition ? transition.name : ""}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      autoHideDuration={100000}
+      autoHideDuration={20000}
     >
       <Paper elevation={7} className={classes.root}>
         <Typography variant="h5" align="center" gutterBottom>

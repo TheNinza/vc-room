@@ -58,30 +58,51 @@ const RecentCallsContainer = () => {
 
   const currentUserUid = useSelector((state) => state.user.userData.uid);
 
-  const [recentCallData, setRecentCallData] = useState([]);
+  const [recentSentCallData, setRecentSentCallData] = useState([]);
+  const [recentReceivedCallData, setRecentReceivedCallData] = useState([]);
+
+  const allCalls = [...recentSentCallData, ...recentReceivedCallData].sort(
+    (a, b) => {
+      return new Date(b.timeStamp) - new Date(a.timeStamp);
+    }
+  );
+
+  console.log("allCalls", allCalls);
 
   useEffect(() => {
     let unsubscribeFromSentCalls = firestore
       .collection("calls")
       .where("from", "==", currentUserUid)
-      .orderBy("timeStamp", "desc")
       .onSnapshot((snapshot) => {
-        let data = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-
-        // neat trick to remove duplicates
-        // let uniqueData = data.filter(
-        //   (item, pos, arr) =>
-        //     pos === 0 || item.userOnOtherSide !== arr[pos - 1].userOnOtherSide
-        // );
-        setRecentCallData(
-          data.map((formatedData) => ({
-            ...formatedData,
-            timeStamp: formatedData?.timeStamp?.toMillis(),
-          }))
-        );
+        let sentCalls = snapshot.docs
+          .map((doc) => ({ ...doc.data(), id: doc.id }))
+          .map((eachData) => ({
+            ...eachData,
+            timeStamp: eachData?.timeStamp?.toMillis(),
+            isCaller: true,
+          }));
+        setRecentSentCallData(sentCalls);
       });
 
-    return unsubscribeFromSentCalls;
+    let unsubscribeFromReceivedCalls = firestore
+      .collection("calls")
+      .where("userOnOtherSide", "==", currentUserUid)
+      .onSnapshot((snapshot) => {
+        let receivedCalls = snapshot.docs
+          .map((doc) => ({ ...doc.data(), id: doc.id }))
+          .map((eachData) => ({
+            ...eachData,
+            timeStamp: eachData?.timeStamp?.toMillis(),
+            isCaller: false,
+          }));
+
+        setRecentReceivedCallData(receivedCalls);
+      });
+
+    return () => {
+      unsubscribeFromSentCalls();
+      unsubscribeFromReceivedCalls();
+    };
   }, [currentUserUid]);
 
   return (
@@ -91,7 +112,7 @@ const RecentCallsContainer = () => {
       </Typography>
 
       <div className={classes.swiperContainer}>
-        {recentCallData.length ? (
+        {allCalls.length ? (
           <>
             <div className={`${classes.next} next`}>
               <PlayCircleFilledIcon fontSize="large" />
@@ -119,7 +140,7 @@ const RecentCallsContainer = () => {
                 },
               }}
             >
-              {recentCallData.map((card, idx) => (
+              {allCalls.map((card, idx) => (
                 <SwiperSlide
                   style={{ transform: "translateX(1.6rem)" }}
                   key={idx}

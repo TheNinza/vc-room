@@ -131,19 +131,21 @@ const CallPage = () => {
   const activeCall = useSelector((state) => state.call.activeCall);
 
   useEffect(() => {
-    const otherUserId = isReceivingCall
-      ? activeCall.from
-      : activeCall.userOnOtherSide;
+    if (activeCall) {
+      const otherUserId = isReceivingCall
+        ? activeCall.from
+        : activeCall.userOnOtherSide;
 
-    firestore
-      .collection("users")
-      .doc(otherUserId)
-      .get()
-      .then((doc) => {
-        const { photoURL: otherPhotoURL, displayName: otherDisplayName } =
-          doc.data();
-        setOtherUserData({ otherPhotoURL, otherDisplayName });
-      });
+      firestore
+        .collection("users")
+        .doc(otherUserId)
+        .get()
+        .then((doc) => {
+          const { photoURL: otherPhotoURL, displayName: otherDisplayName } =
+            doc.data();
+          setOtherUserData({ otherPhotoURL, otherDisplayName });
+        });
+    }
   }, [activeCall, isReceivingCall]);
 
   return (

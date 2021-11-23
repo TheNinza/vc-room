@@ -98,10 +98,7 @@ const Dashboard = () => {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data();
             if (change.type === "added" && data?.timeStamp?.toMillis() > now) {
-              console.log("incomming call", {
-                ...data,
-                timeStamp: data.timeStamp.toMillis(),
-              });
+              clearTimer();
               dispatch(setCallingStatus(true));
               dispatch(setIsReceivingCall(true));
               dispatch(
@@ -126,6 +123,7 @@ const Dashboard = () => {
   useEffect(() => {
     let unsubscribeFromCreateCallDocument;
     if (activeCallDocId) {
+      dispatch(setCallingStatus(true));
       setCallingSnackBarOpen(true);
       unsubscribeFromCreateCallDocument = firestore
         .collection("calls")
@@ -154,6 +152,13 @@ const Dashboard = () => {
             dispatch(resetCallDetails());
             toast.error("Call Declined");
           }
+
+          // set a timeout for 25 secs to reset the call
+          timerRef.current = setTimeout(() => {
+            dispatch(resetCallDetails());
+            setCallingSnackBarOpen(false);
+            toast.error("Call Timed Out");
+          }, 25000);
         });
     } else {
       clearTimer();
