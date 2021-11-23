@@ -5,10 +5,13 @@ import {
   makeStyles,
   Paper,
   Typography,
+  Tooltip,
 } from "@material-ui/core";
 import moment from "moment";
 import CallIcon from "@material-ui/icons/Call";
 import ClearIcon from "@material-ui/icons/Clear";
+import CallMadeIcon from "@material-ui/icons/CallMade";
+import CallReceivedIcon from "@material-ui/icons/CallReceived";
 import { useEffect, useRef, useState } from "react";
 import useOnScreen from "../../hooks/useOnScreen";
 import { firestore } from "../../lib/firebase/firebase";
@@ -25,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "1rem",
+    gap: "0.5rem",
   },
   avatarImage: {
     height: theme.spacing(12),
@@ -62,7 +65,7 @@ const RecentCallCard = ({ card }) => {
     if (isOnScreen) {
       unsubscribe = firestore
         .collection("users")
-        .doc(card.userOnOtherSide)
+        .doc(card.isCaller ? card.userOnOtherSide : card.from)
         .get()
         .then((snapshot) => {
           const { displayName, photoURL } = snapshot.data();
@@ -98,6 +101,16 @@ const RecentCallCard = ({ card }) => {
     }
   };
 
+  const getTitle = () => {
+    return `${card.isCaller ? "Outgoing" : "Incomming"}  ${
+      card.callAccepted
+        ? "call accepted"
+        : card.callDeclined
+        ? "call declined"
+        : "call didn't connect"
+    }`;
+  };
+
   return (
     <Paper ref={cardRef} elevation={6} className={classes.root}>
       {cardData.displayName.length === 0 ? (
@@ -112,6 +125,21 @@ const RecentCallCard = ({ card }) => {
             className={classes.avatarImage}
           />
           <Typography variant="h6">{cardData.displayName}</Typography>
+          <Tooltip title={getTitle()} arrow>
+            <Button
+              style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
+              color={
+                card.callAccepted
+                  ? "primary"
+                  : card.callDeclined
+                  ? "secondary"
+                  : "default"
+              }
+              disableElevation={!card.callAccepted && !card.callDeclined}
+            >
+              {card.isCaller ? <CallMadeIcon /> : <CallReceivedIcon />}
+            </Button>
+          </Tooltip>
           <Typography color="textSecondary" variant="subtitle2">
             {calculateTimeDiff()}
           </Typography>

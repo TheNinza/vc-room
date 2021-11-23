@@ -98,10 +98,7 @@ const Dashboard = () => {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data();
             if (change.type === "added" && data?.timeStamp?.toMillis() > now) {
-              console.log("incomming call", {
-                ...data,
-                timeStamp: data.timeStamp.toMillis(),
-              });
+              clearTimer();
               dispatch(setCallingStatus(true));
               dispatch(setIsReceivingCall(true));
               dispatch(
