@@ -31,9 +31,6 @@ const App = () => {
       dispatch(fetchUserData(user));
       if (user) {
         toast.success(`Welcome ${user.displayName}`);
-        auth.currentUser.getIdToken(true).then((token) => {
-          console.log(token);
-        });
       }
     });
 

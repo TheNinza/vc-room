@@ -25,7 +25,6 @@ exports.people = async (req, res) => {
         ...doc.data(),
       };
     });
-    console.log(usersArray);
     // get friends of the user
     const friends = (
       await firestore.collection("users").doc(uid).collection("friends").get()

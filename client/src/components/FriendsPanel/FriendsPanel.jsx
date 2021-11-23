@@ -84,7 +84,6 @@ const FriendsPanel = () => {
           results.push(data);
         }
       }
-      console.log(results);
       setSearchData(results);
     } else {
       setSearchData([]);

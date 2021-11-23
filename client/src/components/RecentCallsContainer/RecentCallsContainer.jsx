@@ -67,8 +67,6 @@ const RecentCallsContainer = () => {
     }
   );
 
-  console.log("allCalls", allCalls);
-
   useEffect(() => {
     let unsubscribeFromSentCalls = firestore
       .collection("calls")

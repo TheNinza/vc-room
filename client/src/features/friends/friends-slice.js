@@ -15,7 +15,6 @@ const INITIAL_STATE = {
 export const sendFriendRequest = createAsyncThunk(
   "friends/sendFriendRequest",
   async ({ friendUid, uid }, thunkApi) => {
-    console.log({ friendUid, uid });
     if (!friendUid) {
       return null;
     }
@@ -77,7 +76,6 @@ const friendsSlice = createSlice({
 
   extraReducers: (builder) => {
     builder.addCase(sendFriendRequest.fulfilled, (state, { payload }) => {
-      console.log("success");
       state.friendRequestSendingStatus = {
         isError: null,
 
