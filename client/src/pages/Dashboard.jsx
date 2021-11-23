@@ -126,6 +126,7 @@ const Dashboard = () => {
   useEffect(() => {
     let unsubscribeFromCreateCallDocument;
     if (activeCallDocId) {
+      dispatch(setCallingStatus(true));
       setCallingSnackBarOpen(true);
       unsubscribeFromCreateCallDocument = firestore
         .collection("calls")

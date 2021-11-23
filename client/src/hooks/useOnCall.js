@@ -60,8 +60,13 @@ const useOnCall = () => {
   useEffect(() => {
     // get local video stream
 
-    if (!stream) {
+    if (!stream && callDocId) {
       getLocalStream();
+    }
+
+    if (!callDocId?.length) {
+      history.push("/dashboard");
+      toast.error("No call found");
     }
 
     return () => {
@@ -69,7 +74,7 @@ const useOnCall = () => {
         track.stop();
       });
     };
-  }, [stream]);
+  }, [stream, callDocId, history]);
 
   useEffect(() => {
     if (callDocId && stream) {
@@ -169,6 +174,7 @@ const useOnCall = () => {
     return () => {
       peerRef.current.removeAllListeners();
       peerRef.current.destroy();
+      peerRef.current = null;
     };
   }, [callDocId, isReceivingCall, stream, history]);
 
