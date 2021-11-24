@@ -7,12 +7,14 @@ import { auth } from "./lib/firebase/firebase";
 import { fetchUserData } from "./features/user/user-slice";
 import Navbar from "./components/Navbar/Navbar";
 import Blurred from "./components/Blurred/Blurred";
+import FullPageLoader from "./components/FullPageLoader/FullPageLoader";
+import Profile from "./pages/Profile";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CallPage = lazy(() => import("./pages/CallPage"));
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     minHeight: "100vh",
     display: "flex",
@@ -44,13 +46,7 @@ const App = () => {
     <Container maxWidth="xl" className={classes.container}>
       <Toaster position="top-center" reverseOrder={false} />
       <Navbar />
-      <Suspense
-        fallback={
-          <div style={{ color: "white", fontSize: "5rem", marginTop: "50vh" }}>
-            Loading
-          </div>
-        }
-      >
+      <Suspense fallback={<FullPageLoader />}>
         <Switch>
           <Route path="/" exact>
             {!(userData && !error) ? (
@@ -62,8 +58,11 @@ const App = () => {
           <Route path="/dashboard" exact>
             {userData && !error ? <Dashboard /> : <Redirect to="/" />}
           </Route>
-          <Route path="/call">
+          <Route path="/call" exact>
             <CallPage />
+          </Route>
+          <Route path="/profile" exact>
+            <Profile />
           </Route>
         </Switch>
       </Suspense>
