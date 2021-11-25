@@ -7,6 +7,7 @@ import callReducer from "../features/call/call-slice";
 import { suggestionsApi } from "../features/suggestions-api/suggestions-api-slice";
 import { friendsApi } from "../features/friends-api/friends-api-slice";
 import { searchApi } from "../features/search-api/search-api-slice";
+import { userApi } from "../features/user-api/user-api-slice";
 
 export const store = configureStore({
   reducer: {
@@ -18,13 +19,15 @@ export const store = configureStore({
     [suggestionsApi.reducerPath]: suggestionsApi.reducer,
     [friendsApi.reducerPath]: friendsApi.reducer,
     [searchApi.reducerPath]: searchApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(suggestionsApi.middleware)
       .concat(friendsApi.middleware)
-      .concat(searchApi.middleware),
+      .concat(searchApi.middleware)
+      .concat(userApi.middleware),
 });
 
 export const storeDispatch = store.dispatch;

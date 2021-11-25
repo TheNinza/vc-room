@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import { firestore } from "../lib/firebase/firebase";
 import GroupIcon from "@material-ui/icons/Group";
 import CallChart from "../components/CallChart/CallChart";
+import { useUpdateUserMutation } from "../features/user-api/user-api-slice";
+import toast from "react-hot-toast";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -92,10 +94,17 @@ const useStyles = makeStyles((theme) => ({
 
 const Profile = () => {
   const classes = useStyles();
-  const user = useSelector((state) => state.user.userData);
 
+  // local state
   const [userDetail, setUserDetail] = useState();
   const [dirty, setDirty] = useState(false);
+
+  // redux state
+  const user = useSelector((state) => state.user.userData);
+
+  // redux mutations
+  const [updateUser, { isLoading, isSuccess, isError }] =
+    useUpdateUserMutation();
 
   useEffect(() => {
     if (user) {
@@ -142,6 +151,74 @@ const Profile = () => {
     };
   }, [user]);
 
+  useEffect(() => {
+    // set dirty based on isSuccess
+    if (isSuccess) {
+      setDirty(false);
+    }
+    // reset userDetail if isError
+    if (isError) {
+      setUserDetail((prevState) => {
+        return { ...prevState, ...user };
+      });
+    }
+  }, [isSuccess, isError, user]);
+
+  // helper functions
+
+  const handleImageChange = (e) => {
+    const image = e.target.files[0];
+
+    try {
+      const reader = new FileReader();
+
+      // check if the image is valid
+      if (image.type.split("/")[0] !== "image") {
+        throw new Error("Invalid image type");
+      }
+
+      // check if the image is too large
+      if (image.size > 5000000) {
+        throw new Error("Image is too large");
+      }
+
+      reader.readAsDataURL(image);
+      reader.onload = (e) => {
+        setUserDetail((prevState) => {
+          return { ...prevState, photoURL: e.target.result };
+        });
+      };
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!dirty) {
+      toast.info("No changes to update");
+      return;
+    }
+
+    const body = {};
+
+    // check if displayName is changed
+    if (userDetail.displayName !== user.displayName) {
+      body.displayName = userDetail.displayName;
+    }
+
+    // check if photoURL is changed
+    if (userDetail.photoURL !== user.photoURL) {
+      body.photoURL = userDetail.photoURL;
+    }
+
+    // check if status is changed
+    if (userDetail.status !== user.status) {
+      body.status = userDetail.status;
+    }
+
+    updateUser(body);
+  };
+
   return userDetail ? (
     <div className={classes.root}>
       <div className={classes.flexParent}>
@@ -153,13 +230,22 @@ const Profile = () => {
               horizontal: "right",
             }}
             badgeContent={
-              <EditIcon color="primary" className={classes.editIcon} />
+              <label htmlFor="profile-image">
+                <EditIcon color="primary" className={classes.editIcon} />
+              </label>
             }
           >
             <Avatar
               alt={userDetail.displayName}
               src={userDetail.photoURL}
               className={classes.avatarImage}
+            />
+            <input
+              style={{ display: "none" }}
+              type="file"
+              id="profile-image"
+              accept="image/png, image/jpeg"
+              onChange={handleImageChange}
             />
           </Badge>
 
@@ -186,7 +272,9 @@ const Profile = () => {
             name="displayName"
             value={userDetail.displayName}
             onChange={(e) => {
-              setUserDetail({ ...userDetail, displayName: e.target.value });
+              if (e.target.value.length <= 50) {
+                setUserDetail({ ...userDetail, displayName: e.target.value });
+              }
             }}
           />
           <TextField
@@ -206,8 +294,9 @@ const Profile = () => {
             <Button
               variant="contained"
               color="primary"
-              disabled={!dirty}
+              disabled={!dirty || isLoading}
               fullWidth={true}
+              onClick={handleUpdateUser}
             >
               Update
             </Button>
@@ -222,7 +311,7 @@ const Profile = () => {
 
                 setDirty(false);
               }}
-              disabled={!dirty}
+              disabled={!dirty || isLoading}
             >
               Reset
             </Button>

@@ -1,7 +1,11 @@
 import toast from "react-hot-toast";
 
-export const rtkQueryToastLoader = (promise, loadingMessage) => {
-  toast.promise(promise, {
+export const rtkQueryToastLoader = async (
+  promise,
+  loadingMessage,
+  callback = () => {}
+) => {
+  await toast.promise(promise, {
     loading: loadingMessage,
     success: (data) => {
       return data.data.message;
@@ -11,4 +15,6 @@ export const rtkQueryToastLoader = (promise, loadingMessage) => {
       return data.error.data.message;
     },
   });
+
+  callback();
 };
