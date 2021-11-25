@@ -1,5 +1,5 @@
 const sharp = require("sharp");
-const { bucket, firestore, serverTimestamp } = require("../configs/firebase");
+const { bucket, firestore, auth } = require("../configs/firebase");
 const { validateUser } = require("../utils/validateUser");
 
 exports.updateUser = async (req, res) => {
@@ -125,6 +125,121 @@ exports.updateUser = async (req, res) => {
     // return success message
     return res.status(200).json({
       message: "User updated successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { uid } = validateUser(req);
+
+    // create a batch to delete the user
+    const batch = firestore.batch();
+
+    // get the userRef from firestore
+    const userRef = firestore.collection("users").doc(uid);
+
+    // get the user data
+    const userData = await userRef.get();
+
+    // check if the user exists
+    if (!userData.exists) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // get all the notifications to the user
+    const notificationsToUser = await firestore
+      .collection("notifications")
+      .where("to", "==", uid)
+      .get();
+
+    // get all the notifications from the user
+    const notificationsFromUser = await firestore
+      .collection("notifications")
+      .where("from", "==", uid)
+      .get();
+
+    const allNotifications = [
+      ...notificationsToUser.docs,
+      ...notificationsFromUser.docs,
+    ];
+
+    // get all the notifications ids
+    const notificationIds = allNotifications.map(
+      (notification) => notification.id
+    );
+
+    // delete all the notifications
+    notificationIds.forEach((notificationId) => {
+      batch.delete(firestore.collection("notifications").doc(notificationId));
+    });
+
+    // get all notifications data
+    const allNotificationsData = allNotifications.map((notification) => ({
+      ...notification.data(),
+      id: notification.id,
+    }));
+
+    allNotificationsData.forEach((notification) => {
+      if (notification.to === uid) {
+        const fromRef = firestore.collection("users").doc(notification.from);
+        const friendCollectionOfFromRef = fromRef.collection("friends");
+        const friendRef = friendCollectionOfFromRef.doc(uid);
+        batch.delete(friendRef);
+
+        const notificationRefOfFromRef = fromRef
+          .collection("notifications")
+          .doc(notification.id);
+        batch.delete(notificationRefOfFromRef);
+      }
+
+      if (notification.from === uid) {
+        const toRef = firestore.collection("users").doc(notification.to);
+        const friendCollectionOfToRef = toRef.collection("friends");
+        const friendRef = friendCollectionOfToRef.doc(uid);
+        batch.delete(friendRef);
+
+        const notificationRefOfToRef = toRef
+          .collection("notifications")
+          .doc(notification.id);
+        batch.delete(notificationRefOfToRef);
+      }
+    });
+
+    // delete the user
+    batch.delete(userRef);
+
+    // commit the batch
+    await batch.commit();
+
+    // delete all profile images in firebase storage
+    bucket.getFiles(
+      {
+        prefix: `profileImages/${uid}`,
+      },
+      async (err, files) => {
+        if (err) {
+          throw err;
+        }
+        files.forEach(async (file) => {
+          await file.delete();
+        });
+      }
+    );
+
+    // delete the user from the firebase auth
+    await auth.deleteUser(uid);
+
+    // return success message
+    return res.status(200).json({
+      message: "User deleted successfully",
     });
   } catch (err) {
     console.error(err);
