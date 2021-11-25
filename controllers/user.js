@@ -213,6 +213,26 @@ exports.deleteUser = async (req, res) => {
       }
     });
 
+    // delete all calls from the user
+    const calls = await firestore
+      .collection("calls")
+      .where("from", "==", uid)
+      .get();
+
+    calls.docs.forEach((call) => {
+      batch.delete(call.ref);
+    });
+
+    // delete all calls to the user
+    const callsTo = await firestore
+      .collection("calls")
+      .where("userOnOtherSide", "==", uid)
+      .get();
+
+    callsTo.docs.forEach((call) => {
+      batch.delete(call.ref);
+    });
+
     // delete the user
     batch.delete(userRef);
 

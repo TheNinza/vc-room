@@ -32,6 +32,9 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     position: "relative",
     width: "100%",
+    [theme.breakpoints.down("sm")]: {
+      padding: "0.5rem",
+    },
   },
 }));
 
@@ -149,6 +152,7 @@ const CallChart = ({ uid }) => {
           width: "100% !important",
           height: "100% !important",
           display: "block",
+          minHeight: "20rem",
         }}
         options={{
           responsive: true,

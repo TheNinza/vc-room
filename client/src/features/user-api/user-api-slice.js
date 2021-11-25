@@ -29,7 +29,15 @@ export const userApi = createApi({
         });
       },
     }),
+    deleteUser: builder.mutation({
+      query: () => `/deleteUser`,
+      onQueryStarted: async (_data, { queryFulfilled }) => {
+        rtkQueryToastLoader(queryFulfilled, "Deleting User...", () => {
+          auth.signOut();
+        });
+      },
+    }),
   }),
 });
 
-export const { useUpdateUserMutation } = userApi;
+export const { useUpdateUserMutation, useDeleteUserMutation } = userApi;

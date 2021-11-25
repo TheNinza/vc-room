@@ -2,18 +2,28 @@ import {
   Avatar,
   Badge,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
   Paper,
   TextField,
   Typography,
 } from "@material-ui/core";
+import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/styles";
 import { useSelector } from "react-redux";
 import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import { useEffect, useState } from "react";
 import { firestore } from "../lib/firebase/firebase";
 import GroupIcon from "@material-ui/icons/Group";
 import CallChart from "../components/CallChart/CallChart";
-import { useUpdateUserMutation } from "../features/user-api/user-api-slice";
+import {
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+} from "../features/user-api/user-api-slice";
 import toast from "react-hot-toast";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,6 +49,11 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     gap: "2rem",
     justifyContent: "center",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "1rem",
+    },
   },
   paper: {
     display: "flex",
@@ -46,6 +61,9 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     gap: "0.5rem",
     padding: "1rem",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+    },
   },
   avatarImage: {
     width: "150px",
@@ -89,15 +107,26 @@ const useStyles = makeStyles((theme) => ({
     gap: "2rem",
     width: "100%",
     marginTop: "auto",
+
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "1rem",
+    },
   },
 }));
 
 const Profile = () => {
+  // styles
   const classes = useStyles();
+
+  // react router state
+  const history = useHistory();
 
   // local state
   const [userDetail, setUserDetail] = useState();
   const [dirty, setDirty] = useState(false);
+  const [open, setOpen] = useState(false);
 
   // redux state
   const user = useSelector((state) => state.user.userData);
@@ -106,11 +135,16 @@ const Profile = () => {
   const [updateUser, { isLoading, isSuccess, isError }] =
     useUpdateUserMutation();
 
+  const [deleteUser, { isLoading: deleteLoading, isSuccess: deleteSuccess }] =
+    useDeleteUserMutation();
+
   useEffect(() => {
     if (user) {
       setUserDetail(user);
+    } else {
+      history.push("/");
     }
-  }, [user]);
+  }, [user, history]);
 
   useEffect(() => {
     // check if any of the key-value of userDetail is changed
@@ -164,6 +198,12 @@ const Profile = () => {
     }
   }, [isSuccess, isError, user]);
 
+  useEffect(() => {
+    if (deleteSuccess) {
+      history.push("/");
+    }
+  }, [deleteSuccess, history]);
+
   // helper functions
 
   const handleImageChange = (e) => {
@@ -208,7 +248,7 @@ const Profile = () => {
 
     // check if photoURL is changed
     if (userDetail.photoURL !== user.photoURL) {
-      body.photoURL = userDetail.photoURL;
+      body.image = userDetail.photoURL;
     }
 
     // check if status is changed
@@ -217,6 +257,14 @@ const Profile = () => {
     }
 
     updateUser(body);
+  };
+
+  const handleDeleteUser = async () => {
+    if (deleteLoading) {
+      return;
+    }
+
+    deleteUser();
   };
 
   return userDetail ? (
@@ -276,6 +324,7 @@ const Profile = () => {
                 setUserDetail({ ...userDetail, displayName: e.target.value });
               }
             }}
+            disabled={isLoading}
           />
           <TextField
             color="secondary"
@@ -289,6 +338,7 @@ const Profile = () => {
                 setUserDetail({ ...userDetail, status: e.target.value });
               }
             }}
+            disabled={isLoading}
           />
           <div className={classes.buttonContainer}>
             <Button
@@ -315,11 +365,45 @@ const Profile = () => {
             >
               Reset
             </Button>
+
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setOpen(true)}
+              fullWidth={true}
+              startIcon={<DeleteIcon />}
+            >
+              Delete Account
+            </Button>
           </div>
         </Paper>
       </div>
 
       <CallChart uid={user.uid} />
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Are you sure you want to delete your account?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteUser} color="secondary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   ) : null;
 };
