@@ -6,4 +6,5 @@ module.exports = {
       ? process.env.FRONT_END_PROD
       : process.env.FRONT_END_DEV,
   FIREBASE_CONFIG: process.env.FIREBASE_CONFIG,
+  FIREBASE_BUCKET_NAME: process.env.FIREBASE_BUCKET_NAME,
 };
