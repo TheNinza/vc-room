@@ -48,12 +48,15 @@ const CallChart = ({ uid }) => {
   // get last 10 days data of incomming and outgoing calls
   const last10Days =
     incommingCalls.length || outgoingCalls.length
-      ? [...incommingCalls, ...outgoingCalls].filter(
-          (call) =>
-            new Date(call.timeStamp).getTime() >
-            new Date(new Date().setDate(new Date().getDate() - 10)).getTime()
-        )
+      ? [...incommingCalls, ...outgoingCalls]
+          .filter(
+            (call) =>
+              new Date(call.timeStamp).getTime() >
+              new Date(new Date().setDate(new Date().getDate() - 10)).getTime()
+          )
+          .sort((a, b) => a.timeStamp - b.timeStamp)
       : [];
+
   // count number of days from the first call and today
   let days = last10Days.length
     ? moment().diff(moment(last10Days[0].timeStamp), "days") +
