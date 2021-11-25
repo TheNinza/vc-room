@@ -51,6 +51,19 @@ export const friendsApi = createApi({
         rtkQueryToastLoader(queryFulfilled, "Declining friend request...");
       },
     }),
+
+    removeFriend: builder.mutation({
+      query: (data) => {
+        return {
+          url: "/removeFriend",
+          method: "POST",
+          body: data,
+        };
+      },
+      onQueryStarted: async (_data, { queryFulfilled }) => {
+        rtkQueryToastLoader(queryFulfilled, "Removing friend...");
+      },
+    }),
   }),
 });
 
@@ -58,4 +71,5 @@ export const {
   useAcceptFriendRequestMutation,
   useSendFriendRequestMutation,
   useDeclineFriendRequestMutation,
+  useRemoveFriendMutation,
 } = friendsApi;

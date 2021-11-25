@@ -1,10 +1,22 @@
-import { Avatar, Button, makeStyles, Paper } from "@material-ui/core";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  makeStyles,
+  Paper,
+} from "@material-ui/core";
 import CallIcon from "@material-ui/icons/Call";
+import Delete from "@material-ui/icons/CloseOutlined";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useOnScreen from "../../hooks/useOnScreen";
 import { createCall } from "../../features/call/call-slice";
 import { firestore } from "../../lib/firebase/firebase";
+import { useRemoveFriendMutation } from "../../features/friends-api/friends-api-slice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -12,9 +24,9 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: "1rem",
     padding: "0.5rem",
     marginBottom: "1rem",
+    position: "relative",
   },
   name: {
     fontSize: "1rem",
@@ -26,18 +38,33 @@ const useStyles = makeStyles((theme) => ({
     cursor: "pointer",
     fontSize: "2rem",
 
-    "&:hover": {
-      color: theme.palette.secondary.main,
+    "&.call-icon": {
+      marginRight: "0.5rem",
+      "&:hover": {
+        color: theme.palette.secondary.main,
+      },
+    },
+
+    "&.remove-icon": {
+      color: theme.palette.grey[600],
+      "&:hover": {
+        color: theme.palette.error.main,
+      },
     },
   },
   noPadding: {
     padding: 0,
+    minWidth: "fit-content",
+    "&:first-child": {
+      marginRight: "1rem",
+    },
   },
 }));
 
 const PanelFriendCard = ({ friend, searchData = false }) => {
   const classes = useStyles();
   const [userData, setUserData] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const callingStatus = useSelector((state) => state.call.callingStatus);
 
@@ -45,6 +72,8 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
 
   const isIntersecting = useOnScreen(ref);
   const dispatch = useDispatch();
+
+  const [removeFriend] = useRemoveFriendMutation();
 
   const getMoreUserDetails = useCallback(async () => {
     if (!userData) {
@@ -71,11 +100,22 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   const handleCallClick = () => {
     dispatch(createCall(userData.uid));
   };
+
+  const handleRemoveFriend = () => {
+    removeFriend({
+      friendUid: friend.uid,
+    });
+  };
+
   return (
     <Paper ref={ref} elevation={3} className={classes.root}>
       {userData && (
         <>
-          <Avatar alt="profile" src={userData.photoURL} />
+          <Avatar
+            style={{ marginRight: "1rem" }}
+            alt="profile"
+            src={userData.photoURL}
+          />
           <div className={classes.name}>{userData.displayName}</div>
           <Button
             disableElevation
@@ -83,8 +123,40 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
             className={classes.noPadding}
             onClick={handleCallClick}
           >
-            <CallIcon className={classes.callIcon} />
+            <CallIcon className={`${classes.callIcon} call-icon`} />
           </Button>
+          <Button
+            onClick={() => setOpen(true)}
+            disableElevation
+            className={classes.noPadding}
+          >
+            <Delete className={`${classes.callIcon} remove-icon`} />
+          </Button>
+          {/* confirmation dialog while removing friend */}
+          <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              {`Are you sure to remove ${userData.displayName} from your friends?`}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                This action cannot be undone. Also all call history will be
+                deleted.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpen(false)} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleRemoveFriend} color="secondary" autoFocus>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </Paper>

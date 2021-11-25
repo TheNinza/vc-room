@@ -294,3 +294,85 @@ exports.declineFriendRequest = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.removeFriend = async (req, res) => {
+  try {
+    const { uid } = validateUser(req);
+    const { friendUid } = req.body;
+
+    // check if the body is valid
+    if (!friendUid) {
+      return res.status(400).json({
+        message: "Friend UID is required",
+      });
+    }
+
+    // check if the user is friends with the friend
+
+    const query = firestore
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .where("uid", "==", friendUid);
+    const querySnapshot = await query.get();
+
+    if (querySnapshot.empty) {
+      return res.status(400).json({
+        message: "You are not friends with this user",
+      });
+    }
+
+    // delete the friend
+
+    const batch = firestore.batch();
+
+    const friendsRef = firestore
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .doc(friendUid);
+
+    const friendRef = firestore
+      .collection("users")
+      .doc(friendUid)
+      .collection("friends")
+      .doc(uid);
+
+    batch.delete(friendsRef);
+
+    batch.delete(friendRef);
+
+    // delete all the calls between the two users
+
+    const fromCallsRef = firestore
+      .collection("calls")
+      .where("from", "==", uid)
+      .where("userOnOtherSide", "==", friendUid);
+
+    const toCallsRef = firestore
+      .collection("calls")
+      .where("from", "==", friendUid)
+      .where("userOnOtherSide", "==", uid);
+
+    const fromCallsSnapshot = await fromCallsRef.get();
+    const toCallsSnapshot = await toCallsRef.get();
+
+    const fromCalls = fromCallsSnapshot.docs.map((doc) => doc.id);
+    const toCalls = toCallsSnapshot.docs.map((doc) => doc.id);
+
+    const callsToDelete = [...fromCalls, ...toCalls];
+
+    callsToDelete.forEach((callId) => {
+      const callRef = firestore.collection("calls").doc(callId);
+      batch.delete(callRef);
+    });
+
+    await batch.commit();
+
+    res.status(200).json({
+      message: "Successfully deleted friend",
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
