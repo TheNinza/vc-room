@@ -6,11 +6,6 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 ![GitHub issues](https://img.shields.io/github/issues/theninza/vc-room?style=for-the-badge)&nbsp;
 ![GitHub repo size](https://img.shields.io/github/repo-size/theninza/vc-room?style=for-the-badge)
 
-<a href="https://ibb.co/z8sNWcw"><img src="https://i.ibb.co/ZHdNRsC/Screenshot-2021-09-27-at-3-53-19-PM.png" alt="Screenshot-2021-09-27-at-3-53-19-PM" border="0"></a>
-<a href="https://ibb.co/vsPFW8x"><img src="https://i.ibb.co/bHB0Vng/Screenshot-2021-09-27-at-3-55-51-PM.png" alt="Screenshot-2021-09-27-at-3-55-51-PM" border="0"></a><br />
-<a href="https://ibb.co/kMN0S17"><img src="https://i.ibb.co/V3fDqm1/Frame-4.png" alt="Frame-4" border="0"></a><br />
-<a href="https://ibb.co/0qjFrFc"><img src="https://i.ibb.co/G7vtRt0/Screenshot-2021-11-25-at-8-41-36-PM.png" alt="Screenshot-2021-11-25-at-8-41-36-PM" border="0"></a>
-
 ## Tech-Stack
 
 ![React](https://img.shields.io/badge/React-05122A?style=for-the-badge&logo=react)&nbsp;
