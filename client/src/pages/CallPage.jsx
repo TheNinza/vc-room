@@ -59,9 +59,6 @@ const useStyles = makeStyles((theme) => ({
       width: "100%",
       objectFit: "cover",
     },
-    [theme.breakpoints.down("sm")]: {
-      margin: "auto",
-    },
   },
   userInfo: {
     position: "absolute",
