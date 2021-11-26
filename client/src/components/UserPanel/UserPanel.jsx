@@ -115,7 +115,7 @@ const UserPanel = ({ setFriendPanelHeight }) => {
 
   // setting the height of container based on user profile card
   useLayoutEffect(() => {
-    if (!matches) {
+    if (matches) {
       const height = containerRef.current.getBoundingClientRect().height;
       setFriendPanelHeight(height);
       window.addEventListener("resize", () => {
