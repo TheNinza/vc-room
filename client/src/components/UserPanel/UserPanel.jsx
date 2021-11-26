@@ -22,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("sm")]: {
       width: "unset",
       minWidth: "8rem",
+      maxWidth: "8rem",
     },
   },
   paper: {
