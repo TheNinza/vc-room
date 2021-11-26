@@ -152,7 +152,7 @@ const Navbar = (props) => {
                 color="secondary"
                 variant="outlined"
                 onClick={() => {
-                  toast.success("This will be added soon");
+                  window.open("https://github.com/theninza/vc-room");
                 }}
               >
                 Learn More
