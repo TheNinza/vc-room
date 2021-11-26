@@ -10,7 +10,7 @@ import {
   useScrollTrigger,
   useTheme,
 } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Link, useRouteMatch } from "react-router-dom";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import { auth, firestore } from "../../lib/firebase/firebase";
 import toast from "react-hot-toast";
@@ -87,6 +87,7 @@ const Navbar = (props) => {
   const userData = useSelector((state) => state.user.userData);
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));
+  const matchLocation = useRouteMatch();
 
   const notificationCount = useSelector(
     (state) => state.notifications.notificationCount
@@ -106,14 +107,16 @@ const Navbar = (props) => {
         .onSnapshot((snapshot) => {
           dispatch(setNotificationCount(snapshot.docs.length));
           // forcing refetching of suggestions when updating notifications
-          const { refetch } = dispatch(
-            suggestionsApi.endpoints.getSuggestions.initiate()
-          );
-          refetch();
+          if (matchLocation.path === "/dashboard") {
+            const { refetch } = dispatch(
+              suggestionsApi.endpoints.getSuggestions.initiate()
+            );
+            refetch();
+          }
         });
     }
     return unsubscribe;
-  }, [userData, dispatch]);
+  }, [userData, dispatch, matchLocation.path]);
 
   return (
     <div style={{ position: "relative" }}>
