@@ -9,7 +9,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@material-ui/core";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -114,12 +114,12 @@ const UserPanel = ({ setFriendPanelHeight }) => {
   const containerRef = useRef(null);
 
   // setting the height of container based on user profile card
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (matches) {
-      const height = containerRef.current.getBoundingClientRect().height;
+      const height = containerRef.current?.getBoundingClientRect().height;
       setFriendPanelHeight(height);
       window.addEventListener("resize", () => {
-        const height = containerRef.current.getBoundingClientRect().height;
+        const height = containerRef.current?.getBoundingClientRect().height;
         setFriendPanelHeight(height);
       });
     } else {
