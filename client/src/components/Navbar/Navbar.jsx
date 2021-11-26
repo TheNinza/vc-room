@@ -4,6 +4,7 @@ import {
   AppBar,
   Badge,
   Button,
+  ClickAwayListener,
   Typography,
   useMediaQuery,
   useScrollTrigger,
@@ -162,7 +163,15 @@ const Navbar = (props) => {
         </AppBar>
       </ElevationScroll>
       {userData && notificationBar && (
-        <NotificationDropDown uid={userData.uid} />
+        <ClickAwayListener
+          onClickAway={() => {
+            setNotificationBar(false);
+          }}
+        >
+          <div>
+            <NotificationDropDown uid={userData.uid} />
+          </div>
+        </ClickAwayListener>
       )}
     </div>
   );
