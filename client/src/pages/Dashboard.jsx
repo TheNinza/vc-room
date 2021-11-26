@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
       alignItems: "center",
+      gap: "1rem",
     },
   },
   leftPanel: {
@@ -57,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("sm")]: {
       width: "100%",
       marginLeft: 0,
-      display: "none",
     },
   },
 }));

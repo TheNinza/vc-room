@@ -7,6 +7,7 @@ import {
   withStyles,
   Divider,
   useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import { useLayoutEffect, useRef } from "react";
 import { useSelector } from "react-redux";
@@ -101,8 +102,8 @@ const StyledBadge = withStyles((theme) => ({
 
 const UserPanel = ({ setFriendPanelHeight }) => {
   const classes = useStyles();
-
-  const matches = useMediaQuery("(min-width:960px)");
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
   const {
     userData: { displayName, status, photoURL },
@@ -151,13 +152,13 @@ const UserPanel = ({ setFriendPanelHeight }) => {
         <div className={classes.profileText}>
           <Typography
             gutterBottom
-            variant={matches ? "h5" : "subtitle1"}
+            variant={!matches ? "h5" : "subtitle1"}
             align="center"
           >
             {displayName}
           </Typography>
           <Typography
-            variant={matches ? "subtitle2" : "caption"}
+            variant={!matches ? "subtitle2" : "caption"}
             align="center"
             component="div"
             color="textSecondary"
@@ -172,7 +173,7 @@ const UserPanel = ({ setFriendPanelHeight }) => {
         <div className={classes.detailsText}>
           <Typography
             gutterBottom
-            variant={matches ? "h5" : "subtitle1"}
+            variant={!matches ? "h5" : "subtitle1"}
             align="center"
             color="textSecondary"
           >
@@ -180,7 +181,7 @@ const UserPanel = ({ setFriendPanelHeight }) => {
           </Typography>
           <Typography
             gutterBottom
-            variant={matches ? "h5" : "subtitle1"}
+            variant={!matches ? "h5" : "subtitle1"}
             align="center"
             color="textPrimary"
           >
