@@ -32,6 +32,9 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("sm")]: {
       width: "100%",
       height: "90vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
     },
   },
   streams: {
@@ -55,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
       height: "100%",
       width: "100%",
       objectFit: "cover",
+    },
+    [theme.breakpoints.down("sm")]: {
+      margin: "auto",
     },
   },
   userInfo: {
