@@ -22,16 +22,28 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
+    [theme.breakpoints.down("sm")]: {
+      marginTop: "10vh",
+    },
   },
   callContainer: {
     width: "80%",
     height: "70vh",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      height: "90vh",
+    },
   },
   streams: {
     display: "flex",
     gap: "2rem",
     height: "80%",
     justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      width: "100%",
+      gap: "0.5rem",
+    },
   },
   stream: {
     position: "relative",
