@@ -108,10 +108,18 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     marginTop: "auto",
 
+    [theme.breakpoints.down("sm")]: {
+      gap: "1rem",
+    },
+
     [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
       alignItems: "center",
       gap: "1rem",
+
+      "& button": {
+        width: "100% !important",
+      },
     },
   },
 }));
@@ -345,15 +353,20 @@ const Profile = () => {
               variant="contained"
               color="primary"
               disabled={!dirty || isLoading}
-              fullWidth={true}
               onClick={handleUpdateUser}
+              style={{
+                minWidth: "fit-content",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                flex: 1,
+              }}
             >
               Update
             </Button>
             <Button
               variant="contained"
               color="secondary"
-              fullWidth={true}
               onClick={() => {
                 setUserDetail((prevState) => {
                   return { ...prevState, ...user };
@@ -362,6 +375,13 @@ const Profile = () => {
                 setDirty(false);
               }}
               disabled={!dirty || isLoading}
+              style={{
+                minWidth: "fit-content",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                flex: 1,
+              }}
             >
               Reset
             </Button>
@@ -372,6 +392,13 @@ const Profile = () => {
               onClick={() => setOpen(true)}
               fullWidth={true}
               startIcon={<DeleteIcon />}
+              style={{
+                minWidth: "fit-content",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                flex: 1,
+              }}
             >
               Delete Account
             </Button>

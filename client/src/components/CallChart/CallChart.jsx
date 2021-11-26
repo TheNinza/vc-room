@@ -14,7 +14,7 @@ import { Line } from "react-chartjs-2";
 // import faker from "faker";
 import { firestore } from "../../lib/firebase/firebase";
 import { makeStyles, useTheme } from "@material-ui/styles";
-import { Paper } from "@material-ui/core";
+import { Paper, useMediaQuery } from "@material-ui/core";
 
 Chart.register(
   CategoryScale,
@@ -32,8 +32,13 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     position: "relative",
     width: "100%",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("600px")]: {
       padding: "0.5rem",
+      overflowX: "scroll",
+
+      "& canvas": {
+        width: "400px !important",
+      },
     },
   },
 }));
@@ -44,6 +49,7 @@ const CallChart = ({ uid }) => {
 
   const classes = useStyles();
   const theme = useTheme();
+  const matches = useMediaQuery("(max-width:400px)");
 
   // get last 10 days data of incomming and outgoing calls
   const last10Days =
@@ -148,17 +154,23 @@ const CallChart = ({ uid }) => {
   };
 
   return (
-    <Paper elevation={9} className={classes.paper}>
+    <Paper
+      style={{
+        overflowX: matches ? "scroll" : "hidden",
+      }}
+      elevation={9}
+      className={classes.paper}
+    >
       <Line
         data={data}
         style={{
-          width: "100% !important",
+          width: "100%",
           height: "100% !important",
           display: "block",
           minHeight: "20rem",
         }}
         options={{
-          responsive: true,
+          responsive: matches ? false : true,
           maintainAspectRatio: false,
           interaction: {
             mode: "index",
@@ -186,7 +198,7 @@ const CallChart = ({ uid }) => {
               id: "y",
               ticks: {
                 font: {
-                  size: theme.typography.fontSize,
+                  size: matches ? 12 : theme.typography.fontSize,
                   family: "Poppins",
                 },
                 color: theme.palette.text.primary,
@@ -199,10 +211,11 @@ const CallChart = ({ uid }) => {
               id: "x",
               ticks: {
                 font: {
-                  size: theme.typography.fontSize,
+                  size: matches ? 12 : theme.typography.fontSize,
                   family: "Poppins",
                 },
                 color: theme.palette.text.primary,
+                align: "center",
               },
             },
           },
