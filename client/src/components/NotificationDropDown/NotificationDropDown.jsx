@@ -8,16 +8,17 @@ import NotificationCard from "../NotificationCard/NotificationCard";
 const useStyles = makeStyles((theme) => ({
   root: {
     position: "fixed",
-    top: "8vh",
+    top: "10vh",
     right: "1rem",
     width: "30rem",
+    maxWidth: "90%",
     padding: "0.5rem",
     zIndex: 2000,
     backdropFilter: "blur( 10px )",
     WebkitBackdropFilter: "blur( 10px )",
     background: "rgba(0, 0, 0, 0.3)",
     height: "28rem",
-
+    maxHeight: "80vh",
     overflowY: "scroll",
     textAlign: "center",
   },

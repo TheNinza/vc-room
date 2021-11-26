@@ -27,16 +27,25 @@ const useStyles = makeStyles((theme) => ({
     padding: "0.5rem",
     marginBottom: "1rem",
     position: "relative",
+    [theme.breakpoints.down("sm")]: {
+      marginBottom: "0.5rem",
+    },
   },
   name: {
     fontSize: "1rem",
     flex: 1,
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.8rem",
+    },
   },
   callIcon: {
     transform: "scaleX(-1)",
     transition: "all 0.5s ease",
     cursor: "pointer",
     fontSize: "2rem",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "1.5rem",
+    },
 
     "&.call-icon": {
       marginRight: "0.5rem",

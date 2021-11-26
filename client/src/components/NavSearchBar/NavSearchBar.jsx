@@ -14,7 +14,9 @@ import { useGetSearchResultsPeopleQuery } from "../../features/search-api/search
 
 const useStyles = makeStyles((theme) => ({
   searchbar: {
-    width: "50rem",
+    maxWidth: "50rem",
+    flex: 1,
+    minWidth: "0",
   },
   smoothAnimation: {
     borderRadius: theme.spacing(3),
@@ -22,12 +24,16 @@ const useStyles = makeStyles((theme) => ({
   },
   searchContainer: {
     position: "absolute",
-    top: "15vh",
+    top: "12vh",
 
     left: "50%",
-    width: "50rem",
+    minWidth: "50rem",
     zIndex: 10,
     transform: "translateX(-50%)",
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "90%",
+      top: "10vh",
+    },
   },
 }));
 

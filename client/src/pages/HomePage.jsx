@@ -1,10 +1,25 @@
-import { Button, makeStyles, Typography } from "@material-ui/core";
+import {
+  Button,
+  makeStyles,
+  Typography,
+  useMediaQuery,
+} from "@material-ui/core";
 import hero from "../assets/homepage-hero.svg";
 import { ReactComponent as GoogleIcon } from "../assets/google.svg";
 import { signInWithGoogle } from "../lib/firebase/firebase";
 
 const useStyles = makeStyles((theme) => ({
-  root: { flex: 1, display: "flex", marginTop: "5rem" },
+  root: {
+    flex: 1,
+    display: "flex",
+    marginTop: "5rem",
+
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      alignItems: "center",
+      marginTop: "1rem",
+    },
+  },
   flexChildren: {
     flex: 1,
   },
@@ -16,18 +31,25 @@ const useStyles = makeStyles((theme) => ({
   },
   textContainer: {
     marginTop: "5rem",
+    [theme.breakpoints.down("sm")]: {
+      "& *": {
+        textAlign: "center",
+      },
+    },
   },
 }));
 
 const HomePage = () => {
   const classes = useStyles();
+
+  const matches = useMediaQuery("(max-width:600px)");
   return (
     <div className={classes.root}>
       <div className={`${classes.textContainer} ${classes.flexChildren}`}>
-        <Typography gutterBottom variant="h3">
+        <Typography gutterBottom variant={matches ? "h4" : "h3"}>
           The most vibrant place to meet new people
         </Typography>
-        <Typography gutterBottom variant="h6">
+        <Typography gutterBottom variant={matches ? "subtitle1" : "h6"}>
           With{" "}
           <span
             style={{

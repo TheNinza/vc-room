@@ -6,6 +6,8 @@ import {
   Paper,
   Typography,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import moment from "moment";
 import CallIcon from "@material-ui/icons/Call";
@@ -29,11 +31,24 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     alignItems: "center",
     gap: "0.5rem",
+    [theme.breakpoints.down("sm")]: {
+      padding: "0.5rem",
+      minHeight: "13rem",
+      height: "fit-content",
+      width: "7rem",
+      gap: 0,
+    },
   },
   avatarImage: {
     height: theme.spacing(12),
     width: theme.spacing(12),
     marginTop: "1rem",
+    [theme.breakpoints.down("sm")]: {
+      height: theme.spacing(8),
+      width: theme.spacing(8),
+      margin: 0,
+      marginBottom: "0.5rem",
+    },
   },
   controls: {
     display: "flex",
@@ -52,6 +67,8 @@ const useStyles = makeStyles((theme) => ({
 
 const RecentCallCard = ({ card }) => {
   const classes = useStyles();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
   const cardRef = useRef();
   const isOnScreen = useOnScreen(cardRef);
@@ -127,10 +144,16 @@ const RecentCallCard = ({ card }) => {
             src={cardData.photoURL}
             className={classes.avatarImage}
           />
-          <Typography variant="h6">{cardData.displayName}</Typography>
+          <Typography variant={!matches ? "h5" : "subtitle1"}>
+            {cardData.displayName}
+          </Typography>
           <Tooltip title={getTitle()} arrow>
             <Button
-              style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
+              style={{
+                padding: !matches ? "5px" : "2px",
+                borderRadius: "50%",
+                minWidth: 0,
+              }}
               color={
                 card.callAccepted
                   ? "primary"
@@ -150,22 +173,30 @@ const RecentCallCard = ({ card }) => {
           <div className={classes.controls}>
             <div className={classes.control}>
               <Button
-                style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
+                style={{
+                  padding: !matches ? "5px" : "2px",
+                  borderRadius: "50%",
+                  minWidth: 0,
+                }}
                 variant="outlined"
                 color="primary"
                 onClick={handleCallClick}
               >
-                <CallIcon style={{ fontSize: "2rem" }} />
+                <CallIcon style={{ fontSize: !matches ? "2rem" : "1.5rem" }} />
               </Button>
             </div>
             <div className={classes.control}>
               <Button
-                style={{ padding: "5px", borderRadius: "50%", minWidth: 0 }}
+                style={{
+                  padding: !matches ? "5px" : "2px",
+                  borderRadius: "50%",
+                  minWidth: 0,
+                }}
                 variant="outlined"
                 color="secondary"
                 onClick={handleDelete}
               >
-                <ClearIcon style={{ fontSize: "2rem" }} />
+                <ClearIcon style={{ fontSize: !matches ? "2rem" : "1.5rem" }} />
               </Button>
             </div>
           </div>

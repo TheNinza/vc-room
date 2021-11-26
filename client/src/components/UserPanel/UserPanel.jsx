@@ -6,7 +6,10 @@ import {
   Badge,
   withStyles,
   Divider,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -16,16 +19,29 @@ import { selectNumFriends } from "../../features/friends/friends-selector";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
+    position: "relative",
+    [theme.breakpoints.down("sm")]: {
+      width: "unset",
+      minWidth: "8rem",
+      maxWidth: "8rem",
+    },
   },
   paper: {
     width: "100%",
     overflow: "hidden",
+    [theme.breakpoints.down("sm")]: {
+      height: "100%",
+      overflowY: "scroll",
+    },
   },
   imagePreview: {
     position: "relative",
     background: theme.palette.primary.main,
     height: "7rem",
     width: "100%",
+    [theme.breakpoints.down("sm")]: {
+      height: "3rem",
+    },
   },
 
   wave: {
@@ -45,14 +61,29 @@ const useStyles = makeStyles((theme) => ({
   image: {
     height: theme.spacing(17),
     width: theme.spacing(17),
+    [theme.breakpoints.down("sm")]: {
+      height: theme.spacing(10),
+      width: theme.spacing(10),
+    },
   },
   profileText: {
     marginTop: theme.spacing(10),
     marginBottom: theme.spacing(2),
+    [theme.breakpoints.down("sm")]: {
+      marginTop: theme.spacing(6),
+      marginBottom: theme.spacing(2),
+    },
   },
   detailsText: {
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(2),
+    [theme.breakpoints.down("sm")]: {
+      margin: 0,
+
+      "&.profileLink": {
+        margin: theme.spacing(1),
+      },
+    },
   },
 }));
 
@@ -69,8 +100,10 @@ const StyledBadge = withStyles((theme) => ({
   },
 }))(Badge);
 
-const UserPanel = () => {
+const UserPanel = ({ setFriendPanelHeight }) => {
   const classes = useStyles();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
   const {
     userData: { displayName, status, photoURL },
@@ -78,8 +111,28 @@ const UserPanel = () => {
 
   const numFriends = useSelector(selectNumFriends);
 
+  const containerRef = useRef(null);
+
+  // setting the height of container based on user profile card
+  useEffect(() => {
+    if (matches) {
+      const height = containerRef.current?.getBoundingClientRect().height;
+      setFriendPanelHeight(height);
+      window.addEventListener("resize", () => {
+        const height = containerRef.current?.getBoundingClientRect().height;
+        setFriendPanelHeight(height);
+      });
+    } else {
+      setFriendPanelHeight(null);
+    }
+
+    return () => {
+      window.removeEventListener("resize", () => {});
+    };
+  }, [matches, setFriendPanelHeight]);
+
   return (
-    <div className={classes.root}>
+    <div ref={containerRef} className={classes.root}>
       <Paper className={classes.paper} elevation={6}>
         <div className={classes.imagePreview}>
           <img className={classes.wave} src={profileSvgSrc} alt="wave" />
@@ -97,11 +150,15 @@ const UserPanel = () => {
           </div>
         </div>
         <div className={classes.profileText}>
-          <Typography gutterBottom variant="h5" align="center">
+          <Typography
+            gutterBottom
+            variant={!matches ? "h5" : "subtitle1"}
+            align="center"
+          >
             {displayName}
           </Typography>
           <Typography
-            variant="subtitle2"
+            variant={!matches ? "subtitle2" : "caption"}
             align="center"
             component="div"
             color="textSecondary"
@@ -116,7 +173,7 @@ const UserPanel = () => {
         <div className={classes.detailsText}>
           <Typography
             gutterBottom
-            variant="h5"
+            variant={!matches ? "h5" : "subtitle1"}
             align="center"
             color="textSecondary"
           >
@@ -124,7 +181,7 @@ const UserPanel = () => {
           </Typography>
           <Typography
             gutterBottom
-            variant="h5"
+            variant={!matches ? "h5" : "subtitle1"}
             align="center"
             color="textPrimary"
           >
@@ -134,7 +191,7 @@ const UserPanel = () => {
 
         <Divider />
 
-        <div className={classes.detailsText}>
+        <div className={`${classes.detailsText} profileLink`}>
           <Link to="/profile">
             <Typography
               variant="subtitle2"

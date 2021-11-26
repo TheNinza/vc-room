@@ -22,16 +22,31 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
+    [theme.breakpoints.down("sm")]: {
+      marginTop: "10vh",
+    },
   },
   callContainer: {
     width: "80%",
     height: "70vh",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      height: "90vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+    },
   },
   streams: {
     display: "flex",
     gap: "2rem",
     height: "80%",
     justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      width: "100%",
+      gap: "0.5rem",
+    },
   },
   stream: {
     position: "relative",
@@ -43,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
       height: "100%",
       width: "100%",
       objectFit: "cover",
+    },
+    [theme.breakpoints.down("sm")]: {
+      margin: "auto",
     },
   },
   userInfo: {

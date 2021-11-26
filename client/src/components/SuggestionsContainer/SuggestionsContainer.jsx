@@ -16,6 +16,9 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     overflow: "hidden",
     marginBottom: "4rem",
+    [theme.breakpoints.down("sm")]: {
+      marginBottom: "1rem",
+    },
   },
   swiperContainer: {
     width: "100%",
@@ -99,14 +102,41 @@ const SuggestionsContainer = () => {
             navigation={{ nextEl: ".next2", prevEl: ".prev2" }}
             className="mySwiper"
             breakpoints={{
-              640: {
+              150: {
+                slidesPerView: 1,
+              },
+              300: {
                 slidesPerView: 2,
               },
-              768: {
+              500: {
+                slidesPerView: 3,
+              },
+              620: {
                 slidesPerView: 4,
               },
-              1024: {
+              900: {
+                slidesPerView: 5,
+              },
+              960: {
+                slidesPerView: 2,
+              },
+              1100: {
+                slidesPerView: 3,
+              },
+              1300: {
+                slidesPerView: 4,
+              },
+              1500: {
+                slidesPerView: 5,
+              },
+              1700: {
                 slidesPerView: 6,
+              },
+              1900: {
+                slidesPerView: 7,
+              },
+              2100: {
+                slidesPerView: 8,
               },
             }}
           >

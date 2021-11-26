@@ -5,6 +5,8 @@ import {
   makeStyles,
   Paper,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import { useRef, useEffect, useState } from "react";
@@ -21,17 +23,31 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "1rem",
+    gap: "0.5rem",
+    [theme.breakpoints.down("sm")]: {
+      padding: "0.5rem",
+      minHeight: "13rem",
+      height: "fit-content",
+      width: "7rem",
+      gap: 0,
+    },
   },
   avatarImage: {
     height: theme.spacing(12),
     width: theme.spacing(12),
     marginTop: "1rem",
+    [theme.breakpoints.down("sm")]: {
+      height: theme.spacing(8),
+      width: theme.spacing(8),
+      margin: 0,
+      marginBottom: "0.5rem",
+    },
   },
   friends: {
     display: "flex",
     justifyContent: "space-between",
     width: "100%",
+    alignItems: "center",
   },
   loading: {
     display: "flex",
@@ -45,6 +61,9 @@ const useStyles = makeStyles((theme) => ({
 
 const SuggestionCard = ({ uid, refetch }) => {
   const classes = useStyles();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
+
   const cardRef = useRef();
   const [sendReq] = useSendFriendRequestMutation();
 
@@ -93,20 +112,33 @@ const SuggestionCard = ({ uid, refetch }) => {
       />
       {cardData.displayName.length ? (
         <>
-          <Typography variant="h6">{cardData.displayName}</Typography>
+          <Typography variant={!matches ? "h5" : "subtitle1"}>
+            {cardData.displayName}
+          </Typography>
           <div className={classes.friends}>
-            <Typography variant="subtitle1" color="textSecondary">
+            <Typography
+              variant={!matches ? "subtitle1" : "caption"}
+              color="textSecondary"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "0.5rem",
+              }}
+            >
               Friends:{" "}
               <Typography
-                variant="subtitle1"
+                vvariant={!matches ? "subtitle1" : "caption"}
                 color="textPrimary"
-                component="span"
+                style={{ display: "inline-block" }}
               >
                 {friendCount}
               </Typography>
             </Typography>
             <Button
-              style={{ padding: "2px 8px", minWidth: 0 }}
+              style={{
+                padding: !matches ? "5px" : "2px",
+                minWidth: 0,
+              }}
               variant="outlined"
               color="primary"
               onClick={sendFriendReq}
@@ -117,7 +149,7 @@ const SuggestionCard = ({ uid, refetch }) => {
           <Typography
             style={{ fontStyle: "italic", marginTop: "1.5rem" }}
             color="textSecondary"
-            variant="subtitle2"
+            variant={!matches ? "subtitle1" : "caption"}
             align="center"
           >
             "{cardData.status}"
