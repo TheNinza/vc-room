@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import FriendsPanel from "../components/FriendsPanel/FriendsPanel";
 import IncomingCallNotification from "../components/IncomingCallNotification/IncomingCallNotification";
@@ -18,13 +18,17 @@ import { firestore } from "../lib/firebase/firebase";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   root: { flex: 1, display: "flex", position: "relative" },
   flexParent: {
     display: "flex",
     justifyContent: "space-between",
     width: "100%",
     marginTop: "7rem",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      alignItems: "center",
+    },
   },
   leftPanel: {
     width: "18rem",
@@ -35,12 +39,26 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     justifyContent: "space-between",
     gap: "1rem",
+    [theme.breakpoints.down("sm")]: {
+      position: "unset",
+      width: "100%",
+      flexDirection: "row",
+      height: "unset",
+      gap: "0.5rem",
+      alignItems: "flex-start",
+    },
   },
 
   middlePanel: {
     flex: 1,
     marginLeft: "20rem",
     width: "calc(100% - 20rem)",
+
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      marginLeft: 0,
+      display: "none",
+    },
   },
 }));
 
@@ -48,6 +66,7 @@ const Dashboard = () => {
   const classes = useStyles();
 
   // local States
+  const [friendPanelHeight, setFriendPanelHeight] = useState(0);
 
   // Refs
   const timerRef = useRef();
@@ -183,8 +202,8 @@ const Dashboard = () => {
     <div className={classes.root}>
       <div className={classes.flexParent}>
         <div className={classes.leftPanel}>
-          <UserPanel />
-          <FriendsPanel />
+          <UserPanel setFriendPanelHeight={setFriendPanelHeight} />
+          <FriendsPanel friendPanelHeight={friendPanelHeight} />
         </div>
         <div className={classes.middlePanel}>
           <RecentCallsContainer />

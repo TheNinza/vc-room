@@ -24,6 +24,13 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     display: "flex",
     flexDirection: "column",
+    [theme.breakpoints.down("sm")]: {
+      height: "100%",
+      diplay: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      overflowY: "scroll",
+    },
   },
   searchSection: {
     position: "relative",
@@ -37,6 +44,9 @@ const useStyles = makeStyles((theme) => ({
     left: "50%",
     transform: "translate(-50%, 50%)",
     width: "80%",
+    [theme.breakpoints.down("sm")]: {
+      width: "95%",
+    },
   },
   smoothAnimation: {
     borderRadius: theme.spacing(3),
@@ -52,6 +62,7 @@ const useStyles = makeStyles((theme) => ({
     bottom: 0,
     width: "100%",
     transform: "translateY(80%)",
+    zIndex: 0,
   },
 
   friendsContainer: {
@@ -59,10 +70,13 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(7),
     padding: "0 0.5rem",
     overflowY: "scroll",
+    [theme.breakpoints.down("sm")]: {
+      height: "70%",
+    },
   },
 }));
 
-const FriendsPanel = () => {
+const FriendsPanel = ({ friendPanelHeight }) => {
   const classes = useStyles();
   const [searchString, setSearchString] = useState("");
   const [searchData, setSearchData] = useState([]);
@@ -103,7 +117,10 @@ const FriendsPanel = () => {
   }, [searchString, friendsData, debounceSearch]);
 
   return (
-    <div className={classes.root}>
+    <div
+      style={friendPanelHeight ? { height: friendPanelHeight } : {}}
+      className={classes.root}
+    >
       <Paper className={classes.paper} elevation={6}>
         <div className={classes.searchSection}>
           <img className={classes.wave} src={friendSvgSrc} alt="wave" />
