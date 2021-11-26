@@ -87,7 +87,8 @@ const CallChart = ({ uid }) => {
     if (uid) {
       const outgoingCallsCollectionQuery = firestore
         .collection("calls")
-        .where("from", "==", uid);
+        .where("from", "==", uid)
+        .where("callAccepted", "==", true);
 
       unsubscribeFromOutgoingCallsCollection =
         outgoingCallsCollectionQuery.onSnapshot((snapshot) => {
@@ -103,7 +104,8 @@ const CallChart = ({ uid }) => {
 
       const incomingCallsCollectionQuery = firestore
         .collection("calls")
-        .where("userOnOtherSide", "==", uid);
+        .where("userOnOtherSide", "==", uid)
+        .where("callAccepted", "==", true);
 
       unsubscribeFromIncomingCallsCollection =
         incomingCallsCollectionQuery.onSnapshot((snapshot) => {
@@ -188,6 +190,16 @@ const CallChart = ({ uid }) => {
                 },
                 color: theme.palette.text.primary,
               },
+            },
+            title: {
+              display: true,
+              text: "Successfully Connected Calls",
+              font: {
+                size: matches ? theme.typography.fontSize : 24,
+                family: "Poppins",
+                weight: 500,
+              },
+              color: theme.palette.text.primary,
             },
           },
           scales: {
