@@ -19,6 +19,9 @@ const useStyles = makeStyles((theme) => ({
   },
   name: {
     flex: 1,
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "1rem",
+    },
   },
   callIcon: {
     transform: "scaleX(-1)",
@@ -33,6 +36,10 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     height: theme.spacing(10),
     width: theme.spacing(10),
+    [theme.breakpoints.down("sm")]: {
+      height: theme.spacing(6),
+      width: theme.spacing(6),
+    },
   },
 }));
 

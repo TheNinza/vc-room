@@ -5,7 +5,9 @@ import {
   Badge,
   Button,
   Typography,
+  useMediaQuery,
   useScrollTrigger,
+  useTheme,
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import NotificationsIcon from "@material-ui/icons/Notifications";
@@ -48,10 +50,30 @@ const useStyles = makeStyles((theme) => ({
   logo: {
     fontFamily: "Allison",
     width: "fit-content",
+    [theme.breakpoints.down("md")]: {
+      fontSize: "2.5rem",
+      marginRight: "1rem",
+    },
   },
   navLinks: {
     display: "flex",
     gap: "1.5rem",
+
+    [theme.breakpoints.down("md")]: {
+      gap: "1rem",
+      "& *": {
+        padding: 0,
+      },
+    },
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: "0.5rem",
+      gap: "0.5rem",
+      "& *": {
+        padding: 0,
+        width: "fit-content",
+        minWidth: "fit-content",
+      },
+    },
   },
 }));
 
@@ -62,6 +84,8 @@ const Navbar = (props) => {
   const dispatch = useDispatch();
 
   const userData = useSelector((state) => state.user.userData);
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
   const notificationCount = useSelector(
     (state) => state.notifications.notificationCount
@@ -96,7 +120,7 @@ const Navbar = (props) => {
         <AppBar className={classes.appBar} elevation={0} color="transparent">
           <Link to="/">
             <Typography variant="h2" className={classes.logo}>
-              Video Social
+              {matches ? "VS" : "VC Room"}
             </Typography>
           </Link>
 
