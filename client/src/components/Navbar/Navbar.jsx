@@ -50,10 +50,11 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     fontFamily: "Allison",
-    width: "fit-content",
+
     [theme.breakpoints.down("md")]: {
       fontSize: "2.5rem",
       marginRight: "1rem",
+      width: "fit-content",
     },
   },
   navLinks: {
@@ -61,18 +62,20 @@ const useStyles = makeStyles((theme) => ({
     gap: "1.5rem",
 
     [theme.breakpoints.down("md")]: {
-      gap: "1rem",
+      gap: "1.2rem",
       "& *": {
         padding: 0,
       },
     },
     [theme.breakpoints.down("sm")]: {
       marginLeft: "0.5rem",
-      gap: "0.5rem",
       "& *": {
         padding: 0,
         width: "fit-content",
         minWidth: "fit-content",
+        "& .MuiBadge-badge": {
+          minWidth: "20px",
+        },
       },
     },
   },
