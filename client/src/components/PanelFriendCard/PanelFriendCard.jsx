@@ -12,11 +12,11 @@ import {
 import CallIcon from "@material-ui/icons/Call";
 import Delete from "@material-ui/icons/CloseOutlined";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import useOnScreen from "../../hooks/useOnScreen";
-import { createCall } from "../../features/call/call-slice";
 import { firestore } from "../../lib/firebase/firebase";
 import { useRemoveFriendMutation } from "../../features/friends-api/friends-api-slice";
+import { useCreateCallMutation } from "../../features/call-api/call-api-slice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -76,11 +76,11 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   const [open, setOpen] = useState(false);
 
   const callingStatus = useSelector((state) => state.call.callingStatus);
+  const [createCall] = useCreateCallMutation();
 
   const ref = useRef();
 
   const isIntersecting = useOnScreen(ref);
-  const dispatch = useDispatch();
 
   const [removeFriend] = useRemoveFriendMutation();
 
@@ -107,7 +107,9 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   }, [isIntersecting, searchData, friend, getMoreUserDetails]);
 
   const handleCallClick = () => {
-    dispatch(createCall(userData.uid));
+    createCall({
+      userOnOtherSide: userData.uid,
+    });
   };
 
   const handleRemoveFriend = () => {

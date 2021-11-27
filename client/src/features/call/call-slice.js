@@ -1,5 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { firestore, serverTimestamp } from "../../lib/firebase/firebase";
+import { createSlice } from "@reduxjs/toolkit";
 
 const INITIAL_STATE = {
   userOnOtherSide: null,
@@ -8,39 +7,7 @@ const INITIAL_STATE = {
   callingStatus: false,
   activeCall: null,
   activeCallDocId: null,
-  createCallError: null,
-  createCallStarted: false,
-  createCallLoading: false,
-  createCallSuccess: false,
 };
-
-// thunks
-export const createCall = createAsyncThunk(
-  "call/createCall",
-  async (uid, thunkApi) => {
-    if (!uid) {
-      return null;
-    }
-
-    try {
-      const callDoc = firestore.collection("calls").doc();
-
-      await callDoc.set({
-        userOnOtherSide: uid,
-        from: thunkApi.getState().user.userData.uid,
-        timeStamp: serverTimestamp(),
-        callAccepted: false,
-        callDeclined: false,
-      });
-
-      return callDoc.id;
-    } catch (error) {
-      return thunkApi.rejectWithValue({
-        message: "Cannot Create Call",
-      });
-    }
-  }
-);
 
 const callSlice = createSlice({
   name: "call",
@@ -61,29 +28,12 @@ const callSlice = createSlice({
     setActiveCall: (state, { payload }) => {
       state.activeCall = payload;
     },
+    setActiveCallDocId: (state, { payload }) => {
+      state.activeCallDocId = payload;
+    },
     resetCallDetails: () => {
       return INITIAL_STATE;
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(createCall.fulfilled, (state, { payload }) => {
-      state.createCallSuccess = true;
-      state.createCallError = null;
-      state.createCallLoading = false;
-      state.activeCallDocId = payload;
-    });
-    builder.addCase(createCall.rejected, (state, { payload }) => {
-      state.activeCallDocId = null;
-      state.createCallLoading = false;
-      state.createCallError = payload;
-      state.createCallSuccess = false;
-    });
-    builder.addCase(createCall.pending, (state, { payload }) => {
-      state.activeCallDocId = null;
-      state.createCallLoading = true;
-      state.createCallError = null;
-      state.createCallSuccess = false;
-    });
   },
 });
 
@@ -93,6 +43,7 @@ export const {
   setIncomingCallDetails,
   setCallingStatus,
   setActiveCall,
+  setActiveCallDocId,
   resetCallDetails,
 } = callSlice.actions;
 export default callSlice.reducer;

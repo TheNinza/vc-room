@@ -8,6 +8,7 @@ export const rtkQueryToastLoader = async (
   await toast.promise(promise, {
     loading: loadingMessage,
     success: (data) => {
+      callback(data);
       return data.data.message;
     },
     error: (data) => {
@@ -15,6 +16,4 @@ export const rtkQueryToastLoader = async (
       return data.error.data.message;
     },
   });
-
-  callback();
 };

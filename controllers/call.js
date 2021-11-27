@@ -52,7 +52,7 @@ exports.createCall = async (req, res) => {
   } catch (error) {
     console.error("createCall", error);
     res.status(500).json({
-      error: error.message,
+      message: error.message,
     });
   }
 };
@@ -72,7 +72,12 @@ exports.deleteCallRecord = async (req, res) => {
 
     const { userOnOtherSide, from } = callDoc.data();
 
-    if (uid !== from || uid !== userOnOtherSide) {
+    console.log("userOnOtherSide", userOnOtherSide);
+    console.log("from", from);
+    console.log("uid", uid);
+
+    // check if the user is the userOnOtherSide or from
+    if (userOnOtherSide !== uid && from !== uid) {
       return res.status(400).json({
         message: "You are not allowed to delete this call",
       });
@@ -86,7 +91,7 @@ exports.deleteCallRecord = async (req, res) => {
   } catch (error) {
     console.error("deleteCallRecord", error);
     res.status(500).json({
-      error: error.message,
+      message: error.message,
     });
   }
 };

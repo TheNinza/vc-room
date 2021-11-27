@@ -29,9 +29,8 @@ service cloud.firestore {
       
        match /calls/{callId}{
       	allow read: if canReadCallDocument();
-        allow create: if canCreateCallDocument();
         allow update: if canUpdateCallDocument();
-        allow delete: if canDeleteCallDocument();
+        // create and delete is controlled by firebase admin
         
         match /receiver/{receiverId}{
         	allow read: if canReadWriteCallInfo(callId);
@@ -50,8 +49,6 @@ service cloud.firestore {
         return isOwner;
       }
       
-     
-
       function canReadNotificationCollection(){
       	let currentUser = request.auth.uid;
       	let isUserAuthenticated = currentUser != null;
@@ -74,39 +71,11 @@ service cloud.firestore {
         return isUserAuthenticated && isUserIsOneOfTheCallerOrReceiver;
       }
       
-      function canCreateCallDocument(){
-      	let currentUser = request.auth.uid;
-      	let isUserAuthenticated = currentUser != null;
-        let userCalling = request.resource.data.from;
-        let userReceiving = request.resource.data.userOnOtherSide;
-        
-        let isTheUserCallingTheCurrentUser = currentUser == userCalling;
-        
-        let doesCallerExists = exists(/databases/$(database)/documents/users/$(userCalling));
-        let doesReceiverExists = exists(/databases/$(database)/documents/users/$(userReceiving));
-        
-        let areUsersFriendOfEachOther = exists(/databases/$(database)/documents/users/$(userReceiving)/friends/$(userCalling))
-        																&& exists(/databases/$(database)/documents/users/$(userCalling)/friends/$(userReceiving));
-        
-        return isUserAuthenticated && isTheUserCallingTheCurrentUser && doesCallerExists && doesReceiverExists && areUsersFriendOfEachOther;
-      }
-      
       function canUpdateCallDocument(){
       	let currentUser = request.auth.uid;
       	let isUserAuthenticated = currentUser != null;
         let userCalling = request.resource.data.from;
         let userReceiving = request.resource.data.userOnOtherSide;
-        let isCallingOrReceiving = (userCalling == currentUser || userReceiving == currentUser);
-        let doesCallerExists = exists(/databases/$(database)/documents/users/$(userCalling));
-        let doesReceiverExists = exists(/databases/$(database)/documents/users/$(userReceiving));
-        return isUserAuthenticated && isCallingOrReceiving && doesCallerExists && doesReceiverExists;
-      }
-      
-      function canDeleteCallDocument(){
-      	let currentUser = request.auth.uid;
-      	let isUserAuthenticated = currentUser != null;
-        let userCalling = resource.data.from;
-        let userReceiving = resource.data.userOnOtherSide;
         let isCallingOrReceiving = (userCalling == currentUser || userReceiving == currentUser);
         let doesCallerExists = exists(/databases/$(database)/documents/users/$(userCalling));
         let doesReceiverExists = exists(/databases/$(database)/documents/users/$(userReceiving));

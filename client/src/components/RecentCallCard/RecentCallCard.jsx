@@ -17,9 +17,10 @@ import CallReceivedIcon from "@material-ui/icons/CallReceived";
 import { useEffect, useRef, useState } from "react";
 import useOnScreen from "../../hooks/useOnScreen";
 import { firestore } from "../../lib/firebase/firebase";
-import { useDispatch } from "react-redux";
-import { createCall } from "../../features/call/call-slice";
-import toast from "react-hot-toast";
+import {
+  useCreateCallMutation,
+  useDeleteCallMutation,
+} from "../../features/call-api/call-api-slice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -75,7 +76,8 @@ const RecentCallCard = ({ card }) => {
 
   const [cardData, setCardData] = useState({ displayName: "", photoURL: "" });
 
-  const dispatch = useDispatch();
+  const [createCall] = useCreateCallMutation();
+  const [deleteCall] = useDeleteCallMutation();
 
   useEffect(() => {
     let unsubscribe = () => {};
@@ -109,16 +111,15 @@ const RecentCallCard = ({ card }) => {
   };
 
   const handleCallClick = () => {
-    dispatch(createCall(card.isCaller ? card.userOnOtherSide : card.from));
+    createCall({
+      userOnOtherSide: card.isCaller ? card.userOnOtherSide : card.from,
+    });
   };
 
   const handleDelete = async () => {
-    try {
-      await firestore.collection("calls").doc(card.id).delete();
-      toast.success("Deleted!!");
-    } catch (error) {
-      toast.error("Error deleting call");
-    }
+    deleteCall({
+      callId: card.id,
+    });
   };
 
   const getTitle = () => {

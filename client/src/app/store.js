@@ -8,6 +8,7 @@ import { suggestionsApi } from "../features/suggestions-api/suggestions-api-slic
 import { friendsApi } from "../features/friends-api/friends-api-slice";
 import { searchApi } from "../features/search-api/search-api-slice";
 import { userApi } from "../features/user-api/user-api-slice";
+import { callApi } from "../features/call-api/call-api-slice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     [friendsApi.reducerPath]: friendsApi.reducer,
     [searchApi.reducerPath]: searchApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
+    [callApi.reducerPath]: callApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -27,7 +29,8 @@ export const store = configureStore({
       .concat(suggestionsApi.middleware)
       .concat(friendsApi.middleware)
       .concat(searchApi.middleware)
-      .concat(userApi.middleware),
+      .concat(userApi.middleware)
+      .concat(callApi.middleware),
 });
 
 export const storeDispatch = store.dispatch;
