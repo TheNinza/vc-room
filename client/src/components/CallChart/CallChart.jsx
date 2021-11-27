@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import moment from "moment";
 import {
   Chart,
@@ -32,12 +32,12 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     position: "relative",
     width: "100%",
-    [theme.breakpoints.down("600px")]: {
+    [theme.breakpoints.down("800")]: {
       padding: "0.5rem",
       overflowX: "scroll",
 
       "& canvas": {
-        width: "400px !important",
+        overflowX: "scroll",
       },
     },
   },
@@ -46,10 +46,11 @@ const useStyles = makeStyles((theme) => ({
 const CallChart = ({ uid }) => {
   const [incommingCalls, setIncommingCalls] = useState([]);
   const [outgoingCalls, setOutgoingCalls] = useState([]);
-
+  const chartRef = useRef();
+  const containerRef = useRef();
   const classes = useStyles();
   const theme = useTheme();
-  const matches = useMediaQuery("(max-width:400px)");
+  const matches = useMediaQuery("(max-width:800px)");
 
   // get last 10 days data of incomming and outgoing calls
   const last10Days =
@@ -155,21 +156,45 @@ const CallChart = ({ uid }) => {
     ],
   };
 
+  useEffect(() => {
+    const width = days * 91;
+
+    if (chartRef.current && containerRef.current) {
+      let containerWidth = containerRef.current.clientWidth;
+      let containerHeight = containerRef.current.clientHeight;
+      const targetCtx = chartRef.current?.getContext("2d");
+      targetCtx.chart.resize(matches ? width : containerWidth, containerHeight);
+
+      window.addEventListener("resize", () => {
+        containerWidth = containerRef.current?.clientWidth;
+        containerHeight = containerRef.current?.clientHeight;
+        if (containerHeight && containerWidth) {
+          targetCtx?.chart?.resize(
+            matches ? width : containerWidth,
+            containerHeight
+          );
+        }
+      });
+    }
+
+    window.removeEventListener("resize", () => {
+      console.log("removed");
+    });
+  }, [matches, days]);
+
   return (
-    <Paper
-      style={{
-        overflowX: matches ? "scroll" : "hidden",
-      }}
-      elevation={9}
-      className={classes.paper}
-    >
+    <Paper ref={containerRef} elevation={9} className={classes.paper}>
       <Line
+        width={matches ? days * 91 : chartRef.current?.width}
+        height={chartRef.current ? chartRef.current.height : 0}
+        ref={chartRef}
         data={data}
         style={{
-          width: "100%",
+          width: matches ? days * 91 : "100%",
           height: "100% !important",
           display: "block",
           minHeight: "20rem",
+          maxHeight: matches ? "20rem" : "100%",
         }}
         options={{
           responsive: matches ? false : true,
@@ -200,6 +225,7 @@ const CallChart = ({ uid }) => {
                 weight: 500,
               },
               color: theme.palette.text.primary,
+              align: matches ? "start" : "center",
             },
           },
           scales: {
