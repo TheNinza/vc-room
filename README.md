@@ -35,7 +35,7 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 
 :white_check_mark: &nbsp;User Profile Page
 
-:white_large_square: &nbsp;Mobile Responsiveness
+:white_check_mark: &nbsp;Mobile Responsiveness
 
 ## Local Setup
 
