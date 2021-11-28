@@ -157,15 +157,20 @@ const CallChart = ({ uid }) => {
   };
 
   useEffect(() => {
-    const width = days * 91;
-
     if (chartRef.current && containerRef.current) {
       let containerWidth = containerRef.current.clientWidth;
       let containerHeight = containerRef.current.clientHeight;
+
+      const width =
+        (days * 91 > containerWidth ? days * 91 : containerWidth) - 20;
+
       const targetCtx = chartRef.current?.getContext("2d");
       targetCtx.chart.resize(matches ? width : containerWidth, containerHeight);
 
       window.addEventListener("resize", () => {
+        const width =
+          (days * 91 > containerWidth ? days * 91 : containerWidth) - 20;
+
         containerWidth = containerRef.current?.clientWidth;
         containerHeight = containerRef.current?.clientHeight;
         if (containerHeight && containerWidth) {
@@ -185,8 +190,6 @@ const CallChart = ({ uid }) => {
   return (
     <Paper ref={containerRef} elevation={9} className={classes.paper}>
       <Line
-        width={matches ? days * 91 : chartRef.current?.width}
-        height={chartRef.current ? chartRef.current.height : 0}
         ref={chartRef}
         data={data}
         style={{
@@ -194,7 +197,7 @@ const CallChart = ({ uid }) => {
           height: "100% !important",
           display: "block",
           minHeight: "20rem",
-          maxHeight: matches ? "20rem" : "100%",
+          maxHeight: matches ? "20rem" : "70vh",
         }}
         options={{
           responsive: matches ? false : true,
