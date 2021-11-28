@@ -33,6 +33,7 @@ const ElevationScroll = (props) => {
 
   return React.cloneElement(children, {
     elevation: trigger ? 6 : 0,
+    id: trigger ? "navbar-blur" : "navbar-noblur",
   });
 };
 
@@ -46,6 +47,15 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("sm")]: {
       paddingLeft: "24px",
       paddingRight: "24px",
+    },
+
+    "&#navbar-blur": {
+      background: "rgb(0, 0, 0, 0.5)",
+      transition: "background 0.5s ease-in-out",
+      backdropFilter: " blur(16px) saturate(180%)",
+      "&:hover": {
+        background: theme.palette.background.default,
+      },
     },
   },
   logo: {
