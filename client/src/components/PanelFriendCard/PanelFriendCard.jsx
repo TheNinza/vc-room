@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Badge,
   Button,
   Dialog,
   DialogActions,
@@ -8,6 +9,7 @@ import {
   DialogTitle,
   makeStyles,
   Paper,
+  withStyles,
 } from "@material-ui/core";
 import CallIcon from "@material-ui/icons/Call";
 import Delete from "@material-ui/icons/CloseOutlined";
@@ -74,6 +76,7 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
   const classes = useStyles();
   const [userData, setUserData] = useState(null);
   const [open, setOpen] = useState(false);
+  const [online, setOnline] = useState(false);
 
   const callingStatus = useSelector((state) => state.call.callingStatus);
   const [createCall] = useCreateCallMutation();
@@ -106,6 +109,24 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
     }
   }, [isIntersecting, searchData, friend, getMoreUserDetails]);
 
+  // set online offline status from status collection in firestore
+  useEffect(() => {
+    let unsubscribe;
+    if (friend?.uid) {
+      const query = firestore.collection("status").doc(friend.uid);
+
+      unsubscribe = query.onSnapshot((doc) => {
+        if (doc.exists) {
+          setOnline(doc.data().status === "online");
+        }
+      });
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, [friend]);
+
   const handleCallClick = () => {
     createCall({
       userOnOtherSide: userData.uid,
@@ -118,15 +139,36 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
     });
   };
 
+  const StyledBadge = withStyles((theme) => ({
+    badge: {
+      backgroundColor: online ? "#44b700" : theme.palette.grey[600],
+      color: online ? "#44b700" : theme.palette.grey[600],
+      boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    },
+    dot: {
+      width: theme.spacing(1),
+      height: theme.spacing(1),
+      borderRadius: "50%",
+    },
+  }))(Badge);
+
   return (
     <Paper ref={ref} elevation={3} className={classes.root}>
       {userData && (
         <>
-          <Avatar
-            style={{ marginRight: "1rem" }}
-            alt="profile"
-            src={userData.photoURL}
-          />
+          <StyledBadge
+            style={{
+              marginRight: "0.5rem",
+            }}
+            overlap="circular"
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            variant="dot"
+          >
+            <Avatar alt="profile" src={userData.photoURL} />
+          </StyledBadge>
           <div className={classes.name}>{userData.displayName}</div>
           <Button
             disableElevation

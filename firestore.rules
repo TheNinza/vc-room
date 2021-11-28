@@ -42,6 +42,11 @@ service cloud.firestore {
         }
       }
       
+      match /status/{statusId}{
+      	allow read: if canReadStatusDocument();
+        // controlled by firebase-admin
+        allow write: if false;
+      }
       
       // functions
       function isValidUser(userId){
@@ -92,6 +97,13 @@ service cloud.firestore {
         return isUserAuthenticated && isUserIsOneOfTheCallerOrReceiver;
       }
       
+      function canReadStatusDocument(){
+      	let currentUser = request.auth.uid;
+      	let isUserAuthenticated = currentUser != null;
+        let userId = resource.id;
+        let isUserIdFriendOfCurrentUser = exists(/databases/$(database)/documents/users/$(currentUser)/friends/$(userId));   
+        return isUserAuthenticated && isUserIdFriendOfCurrentUser;
+      }
     }
   }
 }

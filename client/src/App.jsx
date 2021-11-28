@@ -1,5 +1,5 @@
 import { Container, makeStyles } from "@material-ui/core";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar/Navbar";
 import Blurred from "./components/Blurred/Blurred";
 import FullPageLoader from "./components/FullPageLoader/FullPageLoader";
 import Profile from "./pages/Profile";
+import io from "socket.io-client";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -28,16 +29,59 @@ const App = () => {
   const dispatch = useDispatch();
   const { userData, error } = useSelector((state) => state.user);
 
+  const socketRef = useRef();
+
+  // handling authentication state
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       dispatch(fetchUserData(user));
       if (user) {
         toast.success(`Welcome ${user.displayName}`);
+
+        // setting up online, offline status
+        auth.currentUser.getIdTokenResult().then(({ token }) => {
+          // setup socket connection
+          socketRef.current = io(
+            process.env.NODE_ENV === "production"
+              ? process.env.REACT_APP_BACKEND_PROD
+              : process.env.REACT_APP_BACKEND_DEV,
+            {
+              auth: {
+                token,
+              },
+            }
+          );
+
+          if (socketRef.current) {
+            socketRef.current.on("connect", () => {
+              console.log("connected");
+            });
+
+            socketRef.current.on("disconnect", () => {
+              console.log("disconnected");
+            });
+
+            socketRef.current.on("error", (error) => {
+              console.log("error", error);
+            });
+          }
+        });
+      } else {
+        if (socketRef.current) {
+          socketRef.current.close();
+          socketRef.current = null;
+        }
       }
     });
 
     // stop listenning when component unmounts
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      if (socketRef.current) {
+        socketRef.current.close();
+        socketRef.current = null;
+      }
+    };
   }, [dispatch]);
 
   // helper functions
