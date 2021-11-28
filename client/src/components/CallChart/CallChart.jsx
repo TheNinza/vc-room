@@ -243,6 +243,7 @@ const CallChart = ({ uid }) => {
                   family: "Poppins",
                 },
                 color: theme.palette.text.primary,
+                precision: 0,
               },
             },
             x: {
