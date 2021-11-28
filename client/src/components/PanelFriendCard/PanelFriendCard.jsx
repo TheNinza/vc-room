@@ -115,11 +115,16 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
     if (friend?.uid) {
       const query = firestore.collection("status").doc(friend.uid);
 
-      unsubscribe = query.onSnapshot((doc) => {
-        if (doc.exists) {
-          setOnline(doc.data().status === "online");
+      unsubscribe = query.onSnapshot(
+        (doc) => {
+          if (doc.exists) {
+            setOnline(doc.data().status === "online");
+          }
+        },
+        (error) => {
+          console.error("error 126", error);
         }
-      });
+      );
     }
 
     return () => {
@@ -141,13 +146,13 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
 
   const StyledBadge = withStyles((theme) => ({
     badge: {
-      backgroundColor: online ? "#44b700" : theme.palette.grey[600],
-      color: online ? "#44b700" : theme.palette.grey[600],
+      backgroundColor: online ? "#5eff00" : theme.palette.grey[600],
+      color: online ? "#5eff00" : theme.palette.grey[600],
       boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
     },
     dot: {
-      width: theme.spacing(1),
-      height: theme.spacing(1),
+      width: theme.spacing(1.2),
+      height: theme.spacing(1.2),
       borderRadius: "50%",
     },
   }))(Badge);

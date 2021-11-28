@@ -43,7 +43,7 @@ service cloud.firestore {
       }
       
       match /status/{statusId}{
-      	allow read: if canReadStatusDocument();
+      	allow read: if canReadStatusDocument(statusId);
         // controlled by firebase-admin
         allow write: if false;
       }
@@ -97,11 +97,10 @@ service cloud.firestore {
         return isUserAuthenticated && isUserIsOneOfTheCallerOrReceiver;
       }
       
-      function canReadStatusDocument(){
+      function canReadStatusDocument(statusId){
       	let currentUser = request.auth.uid;
       	let isUserAuthenticated = currentUser != null;
-        let userId = resource.id;
-        let isUserIdFriendOfCurrentUser = exists(/databases/$(database)/documents/users/$(currentUser)/friends/$(userId));   
+        let isUserIdFriendOfCurrentUser = exists(/databases/$(database)/documents/users/$(currentUser)/friends/$(statusId));
         return isUserAuthenticated && isUserIdFriendOfCurrentUser;
       }
     }
