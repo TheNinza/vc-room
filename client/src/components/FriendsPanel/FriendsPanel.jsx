@@ -3,15 +3,17 @@ import {
   makeStyles,
   Paper,
   TextField,
+  useMediaQuery,
 } from "@material-ui/core";
 import GroupIcon from "@material-ui/icons/Group";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
 import friendSvgSrc from "../../assets/friendsSearchWave.svg";
 import { firestore } from "../../lib/firebase/firebase";
 import PanelFriendCard from "../PanelFriendCard/PanelFriendCard";
 import debounce from "lodash.debounce";
+import { useTheme } from "@material-ui/styles";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,12 +26,9 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     display: "flex",
     flexDirection: "column",
+    gap: theme.spacing(7),
     [theme.breakpoints.down("sm")]: {
-      height: "100%",
-      diplay: "flex",
-      flexDirection: "column",
       justifyContent: "space-between",
-      overflowY: "scroll",
     },
   },
   searchSection: {
@@ -66,13 +65,8 @@ const useStyles = makeStyles((theme) => ({
   },
 
   friendsContainer: {
-    height: "65%",
-    marginTop: theme.spacing(7),
     padding: "0 0.5rem",
     overflowY: "scroll",
-    [theme.breakpoints.down("sm")]: {
-      height: "70%",
-    },
   },
 }));
 
@@ -81,6 +75,12 @@ const FriendsPanel = ({ friendPanelHeight }) => {
   const [searchString, setSearchString] = useState("");
   const [searchData, setSearchData] = useState([]);
   const friendsData = useSelector((state) => state.friends.friendsData);
+
+  const [containerHeight, setContainerHeight] = useState(0);
+  const containerRef = useRef();
+
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
   const getSearchData = async (searchString, friendsData) => {
     let results = [];
@@ -116,6 +116,29 @@ const FriendsPanel = ({ friendPanelHeight }) => {
     debounceSearch(searchString, friendsData);
   }, [searchString, friendsData, debounceSearch]);
 
+  useEffect(() => {
+    if (!matches) {
+      console.log(containerRef.current.offsetTop);
+      setContainerHeight(
+        window.innerHeight - containerRef.current.offsetTop - 112
+      );
+    }
+
+    window.addEventListener("resize", () => {
+      if (!matches) {
+        setContainerHeight(
+          window.innerHeight - containerRef.current.offsetTop - 112
+        );
+      }
+    });
+
+    return () => {
+      window.removeEventListener("resize", () => {
+        console.log(window.innerHeight);
+      });
+    };
+  }, [matches]);
+
   return (
     <div
       style={friendPanelHeight ? { height: friendPanelHeight } : {}}
@@ -146,7 +169,11 @@ const FriendsPanel = ({ friendPanelHeight }) => {
           />
         </div>
 
-        <div className={classes.friendsContainer}>
+        <div
+          className={classes.friendsContainer}
+          style={{ height: matches ? "70%" : `${containerHeight}px` }}
+          ref={containerRef}
+        >
           {searchData.length
             ? searchData.map((friend) => (
                 <PanelFriendCard
