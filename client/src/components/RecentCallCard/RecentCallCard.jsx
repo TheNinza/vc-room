@@ -145,7 +145,7 @@ const RecentCallCard = ({ card }) => {
             src={cardData.photoURL}
             className={classes.avatarImage}
           />
-          <Typography variant={!matches ? "h5" : "subtitle1"}>
+          <Typography variant={!matches ? "h6" : "subtitle1"}>
             {cardData.displayName}
           </Typography>
           <Tooltip title={getTitle()} arrow>

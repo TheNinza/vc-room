@@ -9,6 +9,7 @@ import {
   DialogTitle,
   makeStyles,
   Paper,
+  Typography,
   withStyles,
 } from "@material-ui/core";
 import CallIcon from "@material-ui/icons/Call";
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "0.5rem",
     marginBottom: "1rem",
     position: "relative",
+    gap: "0.5rem",
     [theme.breakpoints.down("sm")]: {
       marginBottom: "0.5rem",
     },
@@ -172,24 +174,40 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
             }}
             variant="dot"
           >
-            <Avatar alt="profile" src={userData.photoURL} />
+            <Avatar
+              style={{ height: "50px", width: "50px" }}
+              alt={userData.name}
+              src={userData.photoURL}
+            />
           </StyledBadge>
-          <div className={classes.name}>{userData.displayName}</div>
-          <Button
-            disableElevation
-            disabled={callingStatus}
-            className={classes.noPadding}
-            onClick={handleCallClick}
-          >
-            <CallIcon className={`${classes.callIcon} call-icon`} />
-          </Button>
-          <Button
-            onClick={() => setOpen(true)}
-            disableElevation
-            className={classes.noPadding}
-          >
-            <Delete className={`${classes.callIcon} remove-icon`} />
-          </Button>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div className={classes.name}>{userData.displayName}</div>
+              <Button
+                disableElevation
+                disabled={callingStatus}
+                className={classes.noPadding}
+                onClick={handleCallClick}
+              >
+                <CallIcon className={`${classes.callIcon} call-icon`} />
+              </Button>
+              <Button
+                onClick={() => setOpen(true)}
+                disableElevation
+                className={classes.noPadding}
+              >
+                <Delete className={`${classes.callIcon} remove-icon`} />
+              </Button>
+            </div>
+            <Typography
+              style={{ fontStyle: "italic" }}
+              variant="caption"
+              color="textSecondary"
+            >
+              "{userData.status}"
+            </Typography>
+          </div>
+
           {/* confirmation dialog while removing friend */}
           <Dialog
             open={open}

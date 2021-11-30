@@ -112,7 +112,7 @@ const SuggestionCard = ({ uid, refetch }) => {
       />
       {cardData.displayName.length ? (
         <>
-          <Typography variant={!matches ? "h5" : "subtitle1"}>
+          <Typography variant={!matches ? "h6" : "subtitle1"}>
             {cardData.displayName}
           </Typography>
           <div className={classes.friends}>
