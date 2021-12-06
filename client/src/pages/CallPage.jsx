@@ -194,7 +194,13 @@ const CallPage = () => {
 
           <Paper elevation={5} className={classes.stream}>
             {/* must mute own video to avoid feedback */}
-            <video ref={localVideoRef} muted autoPlay playsInline></video>
+            <video
+              style={{ transform: "scaleX(-1)" }}
+              ref={localVideoRef}
+              muted
+              autoPlay
+              playsInline
+            ></video>
             <div
               className={
                 isVideoEnabled ? classes.userInfo : classes.mutedVideoUserInfo
