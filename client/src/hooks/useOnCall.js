@@ -172,8 +172,8 @@ const useOnCall = () => {
     }
 
     return () => {
-      peerRef.current.removeAllListeners();
-      peerRef.current.destroy();
+      peerRef.current?.removeAllListeners();
+      peerRef.current?.destroy();
       peerRef.current = null;
     };
   }, [callDocId, isReceivingCall, stream, history]);
