@@ -4,6 +4,7 @@ import {
   makeStyles,
   Paper,
   Typography,
+  TextField,
 } from "@material-ui/core";
 import MicIcon from "@material-ui/icons/Mic";
 import CallEndIcon from "@material-ui/icons/CallEnd";
@@ -12,11 +13,13 @@ import useOnCall from "../hooks/useOnCall";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { firestore } from "../lib/firebase/firebase";
+import toast from "react-hot-toast";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flex: 1,
     display: "flex",
+    flexDirection: "column",
     position: "relative",
     marginTop: "7rem",
     width: "100%",
@@ -24,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     [theme.breakpoints.down("sm")]: {
       marginTop: "10vh",
+      gap: "1rem",
     },
   },
   callContainer: {
@@ -31,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     height: "70vh",
     [theme.breakpoints.down("sm")]: {
       width: "100%",
-      height: "90vh",
+      height: "75vh",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
@@ -111,6 +115,21 @@ const useStyles = makeStyles((theme) => ({
     top: 0,
     left: 0,
   },
+  textField: {
+    width: "100%",
+    maxWidth: "400px",
+    position: "absolute",
+    bottom: "10px",
+    right: "0",
+
+    [theme.breakpoints.down("sm")]: {
+      position: "relative",
+      bottom: "0",
+      right: "0",
+      width: "100%",
+      maxWidth: "100%",
+    },
+  },
 }));
 
 const CallPage = () => {
@@ -141,6 +160,7 @@ const CallPage = () => {
     isAudioEnabled,
     isVideoEnabled,
     isRemoteStreamVideoEnabled,
+    sendMessage,
   } = useOnCall();
 
   const activeCall = useSelector((state) => state.call.activeCall);
@@ -267,6 +287,25 @@ const CallPage = () => {
           </Button>
         </div>
       </div>
+
+      <TextField
+        className={classes.textField}
+        label="Type a message"
+        variant="standard"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            // check if message is not empty
+            if (e.target.value.trim() === "") return;
+            if (e.target.value.trim().length > 50) {
+              toast.error("Message is too long");
+              e.target.value = "";
+              return;
+            }
+            sendMessage(e.target.value);
+            e.target.value = "";
+          }
+        }}
+      />
     </div>
   );
 };

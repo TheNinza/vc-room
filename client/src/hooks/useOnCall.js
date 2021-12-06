@@ -4,6 +4,7 @@ import { firestore } from "../lib/firebase/firebase";
 import Peer from "simple-peer";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router";
+import { Button } from "@material-ui/core";
 
 const useOnCall = () => {
   const history = useHistory();
@@ -41,6 +42,12 @@ const useOnCall = () => {
           isVideoEnabled: stream.getVideoTracks()[0].enabled,
         })
       );
+    }
+  };
+
+  const sendMessage = (message) => {
+    if (peerRef.current && !peerRef.current.destroyed) {
+      peerRef.current.send(JSON.stringify({ message }));
     }
   };
 
@@ -150,7 +157,33 @@ const useOnCall = () => {
       peerRef.current.on("data", (data) => {
         const string = new TextDecoder().decode(data);
         const object = JSON.parse(string);
-        setIsRemoteStreamVideoEnabled(object.isVideoEnabled);
+        const { message = undefined, isVideoEnabled = undefined } = object;
+
+        if (isVideoEnabled !== undefined) {
+          setIsRemoteStreamVideoEnabled(isVideoEnabled);
+        }
+
+        if (message) {
+          toast.loading(
+            (t) => (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <p>{message}</p>
+                <Button
+                  style={{ display: "inline-block" }}
+                  color="secondary"
+                  onClick={() => toast.dismiss(t.id)}
+                >
+                  ❌
+                </Button>
+              </div>
+            ),
+            {
+              position: "top-right",
+              icon: "📩",
+              duration: 5000,
+            }
+          );
+        }
       });
       peerRef.current.on("error", () => {
         toast.error("Something bad happened, retry call");
@@ -186,6 +219,10 @@ const useOnCall = () => {
       toast.dismiss(id);
       toast.success("Connected Successfully");
     }
+
+    return () => {
+      if (id) toast.dismiss(id);
+    };
   }, [isRemoteStreamAvailable]);
 
   return {
@@ -199,6 +236,7 @@ const useOnCall = () => {
     isAudioEnabled,
     isVideoEnabled,
     isRemoteStreamVideoEnabled,
+    sendMessage,
   };
 };
 
