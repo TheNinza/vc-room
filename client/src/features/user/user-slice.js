@@ -16,8 +16,9 @@ export const fetchUserData = createAsyncThunk(
 
     try {
       const userData = await getUserDataFromUserAuth(user);
-      return userData;
+      return { ...userData, createdAt: userData?.createdAt?.toMillis() };
     } catch (error) {
+      console.error(error);
       return thunkApi.rejectWithValue({
         message: "Error Getting Users",
       });

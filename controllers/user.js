@@ -233,6 +233,13 @@ exports.deleteUser = async (req, res) => {
       batch.delete(call.ref);
     });
 
+    // delete user's friends collections
+    const friends = await userRef.collection("friends").get();
+
+    friends.docs.forEach((friend) => {
+      batch.delete(friend.ref);
+    });
+
     // delete the user
     batch.delete(userRef);
 

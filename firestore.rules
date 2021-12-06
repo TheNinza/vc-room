@@ -51,7 +51,7 @@ service cloud.firestore {
       // functions
       function isValidUser(userId){
       	let isOwner = request.auth.uid == userId;
-        let isUserRole = request.data.role == 'user';
+        let isUserRole = request.resource.data.role == 'user';
         return isOwner && isUserRole;
       }
       
