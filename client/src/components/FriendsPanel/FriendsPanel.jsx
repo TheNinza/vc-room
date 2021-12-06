@@ -118,7 +118,6 @@ const FriendsPanel = ({ friendPanelHeight }) => {
 
   useEffect(() => {
     if (!matches) {
-      console.log(containerRef.current.offsetTop);
       setContainerHeight(
         window.innerHeight - containerRef.current.offsetTop - 112
       );

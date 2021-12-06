@@ -151,7 +151,7 @@ const Navbar = (props) => {
                   color="primary"
                 >
                   <Badge color="primary" badgeContent={notificationCount}>
-                    <NotificationsIcon />
+                    <NotificationsIcon id="notification-dropdown" />
                   </Badge>
                 </Button>
                 <Button
@@ -180,7 +180,11 @@ const Navbar = (props) => {
       </ElevationScroll>
       {userData && notificationBar && (
         <ClickAwayListener
-          onClickAway={() => {
+          onClickAway={(e) => {
+            console.log(e, e.target.id);
+            if (e.target.parentNode.id === "notification-dropdown") {
+              return;
+            }
             setNotificationBar(false);
           }}
         >
