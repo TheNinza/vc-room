@@ -96,7 +96,8 @@ const Dashboard = () => {
   useEffect(() => {
     const now = new Date().getTime();
 
-    let unsubscribeFromFriendsCollection, unsubscribeFromCallsCollection;
+    let unsubscribeFromFriendsCollection = () => {},
+      unsubscribeFromCallsCollection = () => {};
     if (uid) {
       const friendCollectionQuery = firestore
         .collection("users")

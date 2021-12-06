@@ -25,7 +25,7 @@ import {
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "11rem",
-    height: "18rem",
+    minHeight: "18rem",
     margin: "1rem 0",
     padding: "1rem",
     display: "flex",

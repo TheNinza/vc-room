@@ -181,7 +181,6 @@ const Navbar = (props) => {
       {userData && notificationBar && (
         <ClickAwayListener
           onClickAway={(e) => {
-            console.log(e, e.target.id);
             if (e.target.parentNode.id === "notification-dropdown") {
               return;
             }

@@ -116,7 +116,27 @@ exports.deleteCallRecord = async (req, res) => {
       });
     }
 
-    await firestore.collection("calls").doc(callId).delete();
+    // delete sender and receiver collections in calls
+    const batch = firestore.batch();
+    const callRef = firestore.collection("calls").doc(callId);
+
+    const senderRef = await callRef.collection("sender").get();
+
+    const receiverRef = await callRef.collection("receiver").get();
+
+    senderRef.forEach((doc) => {
+      console.log("doc delete sender", doc.id);
+      batch.delete(doc.ref);
+    });
+
+    receiverRef.forEach((doc) => {
+      console.log("doc delete receiver", doc.id);
+      batch.delete(doc.ref);
+    });
+
+    batch.delete(callRef);
+
+    await batch.commit();
 
     res.status(200).json({
       message: "Call deleted successfully",

@@ -35,6 +35,32 @@ exports.sendFriendRequest = async (req, res) => {
       });
     }
 
+    // check if the user is already friends with the friend
+    const query3 = firestore
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .where("uid", "==", friendUid);
+    const querySnapshot3 = await query3.get();
+    if (!querySnapshot3.empty) {
+      return res.status(400).json({
+        message: "You are already friends with this user",
+      });
+    }
+
+    // check if the friend is already friends with the user
+    const query4 = firestore
+      .collection("users")
+      .doc(friendUid)
+      .collection("friends")
+      .where("uid", "==", uid);
+    const querySnapshot4 = await query4.get();
+    if (!querySnapshot4.empty) {
+      return res.status(400).json({
+        message: "This user is already friends with you",
+      });
+    }
+
     // create a new friend request
     const batch = firestore.batch();
     const timeStamp = serverTimestamp();

@@ -71,34 +71,39 @@ const RecentCallsContainer = () => {
   );
 
   useEffect(() => {
-    let unsubscribeFromSentCalls = firestore
-      .collection("calls")
-      .where("from", "==", currentUserUid)
-      .onSnapshot((snapshot) => {
-        let sentCalls = snapshot.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id }))
-          .map((eachData) => ({
-            ...eachData,
-            timeStamp: eachData?.timeStamp?.toMillis(),
-            isCaller: true,
-          }));
-        setRecentSentCallData(sentCalls);
-      });
+    let unsubscribeFromSentCalls = () => {};
+    let unsubscribeFromReceivedCalls = () => {};
 
-    let unsubscribeFromReceivedCalls = firestore
-      .collection("calls")
-      .where("userOnOtherSide", "==", currentUserUid)
-      .onSnapshot((snapshot) => {
-        let receivedCalls = snapshot.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id }))
-          .map((eachData) => ({
-            ...eachData,
-            timeStamp: eachData?.timeStamp?.toMillis(),
-            isCaller: false,
-          }));
+    if (currentUserUid) {
+      unsubscribeFromSentCalls = firestore
+        .collection("calls")
+        .where("from", "==", currentUserUid)
+        .onSnapshot((snapshot) => {
+          let sentCalls = snapshot.docs
+            .map((doc) => ({ ...doc.data(), id: doc.id }))
+            .map((eachData) => ({
+              ...eachData,
+              timeStamp: eachData?.timeStamp?.toMillis(),
+              isCaller: true,
+            }));
+          setRecentSentCallData(sentCalls);
+        });
 
-        setRecentReceivedCallData(receivedCalls);
-      });
+      unsubscribeFromReceivedCalls = firestore
+        .collection("calls")
+        .where("userOnOtherSide", "==", currentUserUid)
+        .onSnapshot((snapshot) => {
+          let receivedCalls = snapshot.docs
+            .map((doc) => ({ ...doc.data(), id: doc.id }))
+            .map((eachData) => ({
+              ...eachData,
+              timeStamp: eachData?.timeStamp?.toMillis(),
+              isCaller: false,
+            }));
+
+          setRecentReceivedCallData(receivedCalls);
+        });
+    }
 
     return () => {
       unsubscribeFromSentCalls();

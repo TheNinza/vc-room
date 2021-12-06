@@ -6,9 +6,12 @@ const useOnScreen = (ref) => {
     const observer = new IntersectionObserver(([entry]) =>
       setIsIntersecting(entry.isIntersecting)
     );
-    observer.observe(ref.current);
+
+    const node = ref.current;
+    observer.observe(node);
 
     return () => {
+      observer.unobserve(node);
       observer.disconnect();
     };
   }, [ref]);

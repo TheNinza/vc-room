@@ -14,7 +14,7 @@ import { Line } from "react-chartjs-2";
 // import faker from "faker";
 import { firestore } from "../../lib/firebase/firebase";
 import { makeStyles, useTheme } from "@material-ui/styles";
-import { Paper, useMediaQuery } from "@material-ui/core";
+import { Paper, Typography, useMediaQuery } from "@material-ui/core";
 
 Chart.register(
   CategoryScale,
@@ -186,6 +186,14 @@ const CallChart = ({ uid }) => {
       console.log("removed");
     });
   }, [matches, days]);
+
+  if (!incommingCalls.length && !outgoingCalls.length) {
+    return (
+      <Typography variant="h6" align="center">
+        Go make some calls!
+      </Typography>
+    );
+  }
 
   return (
     <Paper ref={containerRef} elevation={9} className={classes.paper}>

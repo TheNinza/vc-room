@@ -141,6 +141,9 @@ exports.deleteUser = async (req, res) => {
     // create a batch to delete the user
     const batch = firestore.batch();
 
+    // delete the user from the firebase auth
+    await auth.deleteUser(uid);
+
     // get the userRef from firestore
     const userRef = firestore.collection("users").doc(uid);
 
@@ -220,6 +223,23 @@ exports.deleteUser = async (req, res) => {
       .get();
 
     calls.docs.forEach((call) => {
+      call.ref
+        .collection("sender")
+        .get()
+        .then((senders) => {
+          senders.docs.forEach((sender) => {
+            batch.delete(sender.ref);
+          });
+        });
+      call.ref
+        .collection("receiver")
+        .get()
+        .then((receivers) => {
+          receivers.docs.forEach((receiver) => {
+            batch.delete(receiver.ref);
+          });
+        });
+
       batch.delete(call.ref);
     });
 
@@ -230,6 +250,22 @@ exports.deleteUser = async (req, res) => {
       .get();
 
     callsTo.docs.forEach((call) => {
+      call.ref
+        .collection("sender")
+        .get()
+        .then((senders) => {
+          senders.docs.forEach((sender) => {
+            batch.delete(sender.ref);
+          });
+        });
+      call.ref
+        .collection("receiver")
+        .get()
+        .then((recievers) => {
+          recievers.docs.forEach((reciever) => {
+            batch.delete(reciever.ref);
+          });
+        });
       batch.delete(call.ref);
     });
 
@@ -239,6 +275,18 @@ exports.deleteUser = async (req, res) => {
     friends.docs.forEach((friend) => {
       batch.delete(friend.ref);
     });
+
+    // delete user's notifications collection
+    const notifications = await userRef.collection("notifications").get();
+
+    notifications.docs.forEach((notification) => {
+      batch.delete(notification.ref);
+    });
+
+    // delete user's status document
+    const status = firestore.collection("status").doc(uid);
+
+    batch.delete(status);
 
     // delete the user
     batch.delete(userRef);
@@ -260,9 +308,6 @@ exports.deleteUser = async (req, res) => {
         });
       }
     );
-
-    // delete the user from the firebase auth
-    await auth.deleteUser(uid);
 
     // return success message
     return res.status(200).json({

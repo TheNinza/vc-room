@@ -117,16 +117,11 @@ const PanelFriendCard = ({ friend, searchData = false }) => {
     if (friend?.uid) {
       const query = firestore.collection("status").doc(friend.uid);
 
-      unsubscribe = query.onSnapshot(
-        (doc) => {
-          if (doc.exists) {
-            setOnline(doc.data().status === "online");
-          }
-        },
-        (error) => {
-          console.error("error 126", error);
+      unsubscribe = query.onSnapshot((doc) => {
+        if (doc.exists) {
+          setOnline(doc.data().status === "online");
         }
-      );
+      });
     }
 
     return () => {

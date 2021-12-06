@@ -152,7 +152,7 @@ const useOnCall = () => {
         const object = JSON.parse(string);
         setIsRemoteStreamVideoEnabled(object.isVideoEnabled);
       });
-      peerRef.current.on("error", (event) => {
+      peerRef.current.on("error", () => {
         toast.error("Something bad happened, retry call");
         history.push("/dashboard");
       });
@@ -182,7 +182,6 @@ const useOnCall = () => {
     let id;
     if (!isRemoteStreamAvailable) {
       id = toast.loading("Connecting...");
-      console.log(id);
     } else {
       toast.dismiss(id);
       toast.success("Connected Successfully");

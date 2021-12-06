@@ -124,7 +124,7 @@ const FriendsPanel = ({ friendPanelHeight }) => {
     }
 
     window.addEventListener("resize", () => {
-      if (!matches) {
+      if (!matches && containerRef.current) {
         setContainerHeight(
           window.innerHeight - containerRef.current.offsetTop - 112
         );

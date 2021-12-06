@@ -33,56 +33,63 @@ const App = () => {
 
   // handling authentication state
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       dispatch(fetchUserData(user));
+
       if (user) {
         toast.success(`Welcome ${user.displayName}`);
-
-        // setting up online, offline status
-        auth.currentUser.getIdTokenResult().then(({ token }) => {
-          // setup socket connection
-          socketRef.current = io(
-            process.env.NODE_ENV === "production"
-              ? process.env.REACT_APP_BACKEND_PROD
-              : process.env.REACT_APP_BACKEND_DEV,
-            {
-              auth: {
-                token,
-              },
-            }
-          );
-
-          if (socketRef.current) {
-            socketRef.current.on("connect", () => {
-              console.log("connected");
-            });
-
-            socketRef.current.on("disconnect", () => {
-              console.log("disconnected");
-            });
-
-            socketRef.current.on("error", (error) => {
-              console.log("error", error);
-            });
-          }
-        });
-      } else {
-        if (socketRef.current) {
-          socketRef.current.close();
-          socketRef.current = null;
-        }
       }
     });
 
     // stop listenning when component unmounts
     return () => {
       unsubscribe();
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (userData) {
+      auth.currentUser.getIdToken(true).then((token) => {
+        // setup socket connection
+        socketRef.current = io(
+          process.env.NODE_ENV === "production"
+            ? process.env.REACT_APP_BACKEND_PROD
+            : process.env.REACT_APP_BACKEND_DEV,
+          {
+            auth: {
+              token,
+            },
+          }
+        );
+
+        if (socketRef.current) {
+          socketRef.current.on("connect", () => {
+            console.log("connected");
+          });
+
+          socketRef.current.on("disconnect", () => {
+            console.log("disconnected");
+          });
+
+          socketRef.current.on("error", (error) => {
+            console.log("error", error);
+          });
+        }
+      });
+    } else {
+      if (socketRef.current) {
+        socketRef.current.close();
+        socketRef.current = null;
+      }
+    }
+
+    return () => {
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
       }
     };
-  }, [dispatch]);
+  }, [userData]);
 
   // helper functions
 

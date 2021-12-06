@@ -47,6 +47,8 @@ export const getUserDataFromUserAuth = async (user) => {
 
     await userRef.set(data);
 
-    return data;
+    return await userRef.get().then((doc) => {
+      return doc.data();
+    });
   }
 };

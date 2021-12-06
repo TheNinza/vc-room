@@ -88,10 +88,12 @@ io.on("connection", async (socket) => {
 
   socket.on("disconnect", async () => {
     // set status offline in firestore
-    await statusRef.set({
-      status: "offline",
-      timestamp: serverTimestamp(),
-    });
+    if ((await statusRef.get()).exists) {
+      await statusRef.set({
+        status: "offline",
+        timestamp: serverTimestamp(),
+      });
+    }
 
     console.log(`${currentUser.email} is offline`);
   });
