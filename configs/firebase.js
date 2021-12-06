@@ -13,5 +13,6 @@ const auth = firestoreApp.auth();
 const firestore = firestoreApp.firestore();
 const bucket = getStorage().bucket();
 const serverTimestamp = firebaseAdmin.firestore.FieldValue.serverTimestamp;
+const timestamp = firebaseAdmin.firestore.Timestamp.now;
 
-module.exports = { auth, bucket, firestore, serverTimestamp };
+module.exports = { auth, bucket, firestore, serverTimestamp, timestamp };

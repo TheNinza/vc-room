@@ -1,4 +1,8 @@
-const { serverTimestamp, firestore } = require("../configs/firebase");
+const {
+  serverTimestamp,
+  firestore,
+  timestamp,
+} = require("../configs/firebase");
 const { validateUser } = require("../utils/validateUser");
 
 exports.createCall = async (req, res) => {
@@ -33,6 +37,35 @@ exports.createCall = async (req, res) => {
     if (!doc2.exists) {
       return res.status(400).json({
         message: "User is not your friend",
+      });
+    }
+
+    // check if user has already made 5 calls today and they were accepted
+    const today = timestamp().toDate();
+
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const todayEnd = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
+
+    const query3 = firestore
+      .collection("calls")
+      .where("from", "==", uid)
+      .where("timeStamp", ">=", todayStart)
+      .where("timeStamp", "<", todayEnd)
+      .where("callAccepted", "==", true);
+
+    const docs = await query3.get();
+
+    if (docs.size >= 5) {
+      return res.status(400).json({
+        message: "You have already made 5 calls today",
       });
     }
 
