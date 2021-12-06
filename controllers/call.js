@@ -40,32 +40,51 @@ exports.createCall = async (req, res) => {
       });
     }
 
-    // check if user has already made 5 calls today and they were accepted
-    const today = timestamp().toDate();
+    // check if user has 'user' role and has already made 5 calls today and they were accepted
 
-    const todayStart = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const todayEnd = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1
-    );
+    const userRef = firestore.collection("users").doc(uid);
 
-    const query3 = firestore
-      .collection("calls")
-      .where("from", "==", uid)
-      .where("timeStamp", ">=", todayStart)
-      .where("timeStamp", "<", todayEnd)
-      .where("callAccepted", "==", true);
+    const userDoc = await userRef.get();
 
-    const docs = await query3.get();
-
-    if (docs.size >= 5) {
+    if (!userDoc.exists) {
       return res.status(400).json({
-        message: "You have already made 5 calls today",
+        message: "User does not exist",
+      });
+    }
+
+    const { role } = userDoc.data();
+
+    if (role === "user") {
+      const today = timestamp().toDate();
+
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+      const todayEnd = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + 1
+      );
+
+      const query3 = firestore
+        .collection("calls")
+        .where("from", "==", uid)
+        .where("timeStamp", ">=", todayStart)
+        .where("timeStamp", "<", todayEnd)
+        .where("callAccepted", "==", true);
+
+      const docs = await query3.get();
+
+      if (docs.size >= 5) {
+        return res.status(400).json({
+          message: "You have already made 5 calls today",
+        });
+      }
+    } else if (role !== "unlimited") {
+      return res.status(400).json({
+        message: "User does not have the correct role",
       });
     }
 
@@ -105,10 +124,6 @@ exports.deleteCallRecord = async (req, res) => {
 
     const { userOnOtherSide, from } = callDoc.data();
 
-    console.log("userOnOtherSide", userOnOtherSide);
-    console.log("from", from);
-    console.log("uid", uid);
-
     // check if the user is the userOnOtherSide or from
     if (userOnOtherSide !== uid && from !== uid) {
       return res.status(400).json({
@@ -125,12 +140,10 @@ exports.deleteCallRecord = async (req, res) => {
     const receiverRef = await callRef.collection("receiver").get();
 
     senderRef.forEach((doc) => {
-      console.log("doc delete sender", doc.id);
       batch.delete(doc.ref);
     });
 
     receiverRef.forEach((doc) => {
-      console.log("doc delete receiver", doc.id);
       batch.delete(doc.ref);
     });
 
