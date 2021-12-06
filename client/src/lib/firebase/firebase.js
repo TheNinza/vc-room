@@ -41,6 +41,8 @@ export const getUserDataFromUserAuth = async (user) => {
       status: "Hello There!! M new here",
       photoURL: user.photoURL,
       email: user.email,
+      createdAt: serverTimestamp(),
+      role: "user",
     };
 
     await userRef.set(data);

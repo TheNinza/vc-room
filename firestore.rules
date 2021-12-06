@@ -51,7 +51,8 @@ service cloud.firestore {
       // functions
       function isValidUser(userId){
       	let isOwner = request.auth.uid == userId;
-        return isOwner;
+        let isUserRole = request.data.role == 'user';
+        return isOwner && isUserRole;
       }
       
       function canReadNotificationCollection(){
