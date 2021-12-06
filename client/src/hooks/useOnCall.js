@@ -143,7 +143,7 @@ const useOnCall = () => {
         peerRef.current.on("stream", (stream) => {
           console.log("Stream Received");
           setIsRemoteStreamAvailable(true);
-          toast.success("Connected Successfully");
+
           remoteVideoRef.current.srcObject = stream;
         });
       }
@@ -177,6 +177,17 @@ const useOnCall = () => {
       peerRef.current = null;
     };
   }, [callDocId, isReceivingCall, stream, history]);
+
+  useEffect(() => {
+    let id;
+    if (!isRemoteStreamAvailable) {
+      id = toast.loading("Connecting...");
+      console.log(id);
+    } else {
+      toast.dismiss(id);
+      toast.success("Connected Successfully");
+    }
+  }, [isRemoteStreamAvailable]);
 
   return {
     localVideoRef,

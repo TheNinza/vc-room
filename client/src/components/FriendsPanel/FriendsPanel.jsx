@@ -117,7 +117,7 @@ const FriendsPanel = ({ friendPanelHeight }) => {
   }, [searchString, friendsData, debounceSearch]);
 
   useEffect(() => {
-    if (!matches) {
+    if (!matches && containerRef.current) {
       setContainerHeight(
         window.innerHeight - containerRef.current.offsetTop - 112
       );
