@@ -41,6 +41,7 @@ app.use("/api/friends", require("./routes/friends.js"));
 app.use("/api/search", require("./routes/search.js"));
 app.use("/api/call", require("./routes/call.js"));
 app.use("/api/user", require("./routes/user.js"));
+app.use("/api/payments", require("./routes/payments.js"));
 
 // listner
 const port = process.env.PORT || 8000;
