@@ -25,6 +25,7 @@ import {
   useUpdateUserMutation,
 } from "../features/user-api/user-api-slice";
 import toast from "react-hot-toast";
+import CoinCounter from "../components/CoinCounter/CoinCounter";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -304,7 +305,7 @@ const Profile = () => {
               onChange={handleImageChange}
             />
           </Badge>
-
+          <CoinCounter position="static" />
           <Typography variant="subtitle1">{userDetail.email}</Typography>
           <Typography
             variant="subtitle1"

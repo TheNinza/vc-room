@@ -1,10 +1,14 @@
-import { CircularProgress, makeStyles } from "@material-ui/core";
-import { useEffect, useState } from "react";
+import { CircularProgress, makeStyles, Dialog } from "@material-ui/core";
+import { lazy, useEffect, useState } from "react";
 import { ReactComponent as Coin } from "../../assets/vsCoin.svg";
+import { Suspense } from "react";
+// lazy imports
+const PaymentIntegrationModal = lazy(() =>
+  import("../PaymentIntegrationModal/PaymentIntegrationModal")
+);
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    position: "absolute",
     top: 10,
     right: 10,
     zIndex: 10,
@@ -32,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     [theme.breakpoints.down("sm")]: {
-      position: "unset",
+      position: "static !important",
       marginTop: "1rem",
       width: "fit-content",
       margin: "auto",
@@ -66,12 +70,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CoinCounter = () => {
+const CoinCounter = ({ position = "absolute" }) => {
   // styles
   const classes = useStyles();
 
   const [coins, setCoins] = useState(0);
   const [finalCoins, setFinalCoins] = useState(0);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isOpen, setIsOpen] = useState(false);
 
   // animate coin counter
   useEffect(() => {
@@ -100,27 +108,54 @@ const CoinCounter = () => {
   }, [coins, finalCoins]);
 
   return (
-    <div className={classes.root}>
-      {coins !== null ? (
-        <div
-          onClick={() =>
-            // set coins to random integer from 1 to 50
-            setFinalCoins(Math.floor(Math.random() * 100) + 1)
+    <>
+      <div className={classes.root} style={{ position }}>
+        {!isLoading ? (
+          <div
+            onClick={() =>
+              // set coins to random integer from 1 to 50
+              setIsOpen(true)
+            }
+            className={classes.container}
+          >
+            <Coin className={classes.coin} /> <span> x {coins}</span>
+          </div>
+        ) : (
+          <CircularProgress
+            size={20}
+            onClick={() => {
+              // set coins to random integer from 1 to 50
+              setFinalCoins(Math.floor(Math.random() * 100) + 1);
+              setIsLoading(false);
+            }}
+          />
+        )}
+      </div>
+
+      <Dialog
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        fullWidth
+      >
+        <Suspense
+          fallback={
+            <div
+              className={classes.container}
+              style={{
+                width: "100%",
+                height: "100vh",
+              }}
+            >
+              <CircularProgress />
+            </div>
           }
-          className={classes.container}
         >
-          <Coin className={classes.coin} /> <span> x {coins}</span>
-        </div>
-      ) : (
-        <CircularProgress
-          size={20}
-          onClick={() =>
-            // set coins to random integer from 1 to 50
-            setFinalCoins(Math.floor(Math.random() * 100) + 1)
-          }
-        />
-      )}
-    </div>
+          <PaymentIntegrationModal />
+        </Suspense>
+      </Dialog>
+    </>
   );
 };
 
