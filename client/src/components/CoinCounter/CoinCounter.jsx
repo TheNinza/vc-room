@@ -1,5 +1,5 @@
 import { CircularProgress, makeStyles } from "@material-ui/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactComponent as Coin } from "../../assets/vsCoin.svg";
 
 const useStyles = makeStyles((theme) => ({
@@ -71,15 +71,54 @@ const CoinCounter = () => {
   const classes = useStyles();
 
   const [coins, setCoins] = useState(0);
+  const [finalCoins, setFinalCoins] = useState(0);
+
+  // animate coin counter
+  useEffect(() => {
+    let timeout;
+    if (coins === finalCoins) {
+      clearTimeout(timeout);
+      return;
+    } else {
+      const diff = finalCoins - coins;
+      timeout = setTimeout(() => {
+        if (coins === finalCoins) {
+          clearInterval(timeout);
+        } else {
+          if (diff > 0) {
+            setCoins(coins + 1);
+          } else {
+            setCoins(coins - 1);
+          }
+        }
+      }, 50);
+    }
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [coins, finalCoins]);
 
   return (
     <div className={classes.root}>
-      {coins ? (
-        <div className={classes.container}>
+      {coins !== null ? (
+        <div
+          onClick={() =>
+            // set coins to random integer from 1 to 50
+            setFinalCoins(Math.floor(Math.random() * 100) + 1)
+          }
+          className={classes.container}
+        >
           <Coin className={classes.coin} /> <span> x {coins}</span>
         </div>
       ) : (
-        <CircularProgress size={20} onClick={() => setCoins(20)} />
+        <CircularProgress
+          size={20}
+          onClick={() =>
+            // set coins to random integer from 1 to 50
+            setFinalCoins(Math.floor(Math.random() * 100) + 1)
+          }
+        />
       )}
     </div>
   );
