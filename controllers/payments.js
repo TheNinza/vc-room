@@ -10,6 +10,7 @@ exports.products = async (_req, res) => {
         amount: item.unit_amount / 100,
         currency: item.currency,
         quantity: item.transform_quantity.divide_by,
+        name: item.nickname,
       };
     });
 
