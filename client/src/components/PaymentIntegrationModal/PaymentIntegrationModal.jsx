@@ -145,12 +145,16 @@ const PaymentIntegrationModal = () => {
         gutterBottom
       >
         Get the credits for making calls
-      </Typography>
-      <div className={classes.planContainer}>
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          <>
+      </Typography>{" "}
+      {isLoading ? (
+        <CircularProgress
+          style={{
+            margin: "auto",
+          }}
+        />
+      ) : (
+        <>
+          <div className={classes.planContainer}>
             {data.map((plan, idx) => (
               <Paper
                 elevation={0}
@@ -196,13 +200,12 @@ const PaymentIntegrationModal = () => {
                 </div>
               </Paper>
             ))}
-          </>
-        )}
-      </div>
-
-      <Button size="large" variant="contained" color="primary">
-        Buy Now
-      </Button>
+          </div>
+          <Button size="large" variant="contained" color="primary">
+            Buy Now
+          </Button>
+        </>
+      )}
     </div>
   );
 };
