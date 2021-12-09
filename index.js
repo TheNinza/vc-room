@@ -19,9 +19,14 @@ app.use(
     origin: FRONT_END,
   })
 );
+
+// setting rawBody for webhook handling
 app.use(
   express.json({
     limit: "10mb",
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
   })
 );
 app.use(decodeJWT);

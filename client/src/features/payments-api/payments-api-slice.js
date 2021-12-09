@@ -10,7 +10,7 @@ export const paymentsApi = createApi({
         : process.env.REACT_APP_BACKEND_DEV + "/api/payments",
 
     prepareHeaders: async (headers) => {
-      const token = await auth.currentUser.getIdToken();
+      const token = await auth.currentUser.getIdToken(true);
       headers.set("Authorization", `Bearer ${token}`);
       return headers;
     },

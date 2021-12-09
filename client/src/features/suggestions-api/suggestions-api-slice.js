@@ -9,7 +9,7 @@ export const suggestionsApi = createApi({
         ? process.env.REACT_APP_BACKEND_PROD
         : process.env.REACT_APP_BACKEND_DEV,
     prepareHeaders: async (headers) => {
-      const token = await auth.currentUser.getIdToken();
+      const token = await auth.currentUser.getIdToken(true);
       headers.set("Authorization", `Bearer ${token}`);
       return headers;
     },

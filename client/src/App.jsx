@@ -51,6 +51,7 @@ const App = () => {
     if (userData) {
       auth.currentUser.getIdToken(true).then((token) => {
         // setup socket connection
+        console.log(token);
         socketRef.current = io(
           process.env.NODE_ENV === "production"
             ? process.env.REACT_APP_BACKEND_PROD
