@@ -14,6 +14,7 @@ import io from "socket.io-client";
 const HomePage = lazy(() => import("./pages/HomePage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CallPage = lazy(() => import("./pages/CallPage"));
+const Payments = lazy(() => import("./pages/Payments"));
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -115,6 +116,9 @@ const App = () => {
           </Route>
           <Route path="/profile" exact>
             <Profile />
+          </Route>
+          <Route path="/payments" exact>
+            <Payments />
           </Route>
         </Switch>
       </Suspense>
