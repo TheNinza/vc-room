@@ -78,8 +78,8 @@ exports.checkout = async (req, res) => {
       ],
       customer: customer.id,
       mode: "payment",
-      success_url: `${FRONT_END}/payments?success=true&sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${FRONT_END}/payments?success=false&sessionId={CHECKOUT_SESSION_ID}`,
+      success_url: `${FRONT_END}/payments?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONT_END}/payments?sessionId={CHECKOUT_SESSION_ID}`,
       metadata: {
         priceId,
       },
@@ -111,17 +111,46 @@ exports.checkout = async (req, res) => {
 
 exports.retrieveSessionDetails = async (req, res) => {
   try {
+    const { uid } = validateUser(req);
     const sessionId = req.body.sessionId;
+
+    // check if session exists in firebase
+    const sessionRef = firestore
+      .collection("accounts")
+      .doc(uid)
+      .collection("sessions")
+      .doc(sessionId);
+
+    const sessionSnapshot = await sessionRef.get();
+
+    if (!sessionSnapshot.exists) {
+      res.status(404).json({
+        message: "Session not found",
+      });
+    }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["payment_intent"],
     });
 
-    // check if the payment was successful
+    // fetch price details from stripe
+    const price = await stripe.prices.retrieve(session.metadata.priceId);
 
     res.status(200).json({
       paymentStatus: session.payment_intent.status,
-      session,
+      session: {
+        id: session.id,
+        paymentStatus: session.payment_status,
+        receiptUrl: session.payment_intent?.charges.data[0]?.receipt_url,
+        resumeUrl: session.url,
+      },
+      message: "Successfully retrieved session details",
+      price: {
+        name: price.nickname,
+        amount: price.unit_amount / 100,
+        quantity: price.transform_quantity.divide_by,
+      },
+      customerEmail: session.customer_details.email,
     });
   } catch (error) {
     console.log(error);

@@ -45,7 +45,22 @@ export const paymentsApi = createApi({
         );
       },
     }),
+
+    fetchSession: builder.query({
+      query: (data) => ({
+        url: "/retrieveSessionDetails",
+        method: "POST",
+        body: data,
+      }),
+      onQueryStarted: (data, { queryFulfilled }) => {
+        rtkQueryToastLoader(queryFulfilled, "Retrieving Your Payment");
+      },
+    }),
   }),
 });
 
-export const { useFetchProductsQuery, useCheckoutMutation } = paymentsApi;
+export const {
+  useFetchProductsQuery,
+  useCheckoutMutation,
+  useFetchSessionQuery,
+} = paymentsApi;
