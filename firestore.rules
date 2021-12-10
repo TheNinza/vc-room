@@ -48,6 +48,18 @@ service cloud.firestore {
         allow write: if false;
       }
       
+
+      match /accounts/{accountId}{
+      	allow read: if canReadAccountDocument(accountId);
+        allow create: if canCreateAccountDocument(accountId);
+
+        match /sessions/{sessionId}{
+        	allow read: if canReadSessionDocument(accountId);
+          // controlled by firebase-admin
+          allow write: if false;
+        }
+      }
+
       // functions
       function isValidUser(userId){
       	let isOwner = request.auth.uid == userId;
@@ -103,6 +115,30 @@ service cloud.firestore {
       	let isUserAuthenticated = currentUser != null;
         let isUserIdFriendOfCurrentUser = exists(/databases/$(database)/documents/users/$(currentUser)/friends/$(statusId));
         return isUserAuthenticated && isUserIdFriendOfCurrentUser;
+      }
+
+      function canCreateAccountDocument(accountId){
+      	let currentUser = request.auth.uid;
+      	let isUserAuthenticated = currentUser != null;
+        let currentUserAccount = getAfter(/databases/$(database)/documents/accounts/$(accountId));
+        let isCurrentUserAccount = currentUserAccount.data.uid == currentUser;
+        // check if credits are strictly 2 in number
+        let isCurrentUserAccountCreditsStrictly2 = currentUserAccount.data.credits == 2;
+        return isUserAuthenticated && isCurrentUserAccount && isCurrentUserAccountCreditsStrictly2;
+      }
+
+      function canReadAccountDocument(accountId){
+      	let currentUser = request.auth.uid;
+      	let isUserAuthenticated = currentUser != null;
+        let isCurrentUserAccount = accountId == currentUser;
+        return isUserAuthenticated && isCurrentUserAccount;
+      }
+
+      function canReadSessionDocument(accountId){
+      	let currentUser = request.auth.uid;
+      	let isUserAuthenticated = currentUser != null;
+        let isCurrentUserAccount = get(/databases/$(database)/documents/accounts/$(accountId)).data.uid == currentUser;
+        return isUserAuthenticated && isCurrentUserAccount;
       }
     }
   }
