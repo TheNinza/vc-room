@@ -2,6 +2,7 @@ const {
   serverTimestamp,
   firestore,
   timestamp,
+  increment,
 } = require("../configs/firebase");
 const { validateUser } = require("../utils/validateUser");
 
@@ -40,7 +41,7 @@ exports.createCall = async (req, res) => {
       });
     }
 
-    // check if user has 'user' role and has already made 5 calls today and they were accepted
+    // check if user has 'user' role and has enough credits
 
     const userRef = firestore.collection("users").doc(uid);
 
@@ -55,31 +56,20 @@ exports.createCall = async (req, res) => {
     const { role } = userDoc.data();
 
     if (role === "user") {
-      const today = timestamp().toDate();
+      const accountRef = firestore.collection("accounts").doc(uid);
+      const accountDoc = await accountRef.get();
 
-      const todayStart = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-      const todayEnd = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() + 1
-      );
-
-      const query3 = firestore
-        .collection("calls")
-        .where("from", "==", uid)
-        .where("timeStamp", ">=", todayStart)
-        .where("timeStamp", "<", todayEnd)
-        .where("callAccepted", "==", true);
-
-      const docs = await query3.get();
-
-      if (docs.size >= 5) {
+      if (!accountDoc.exists) {
         return res.status(400).json({
-          message: "You have already made 5 calls today",
+          message: "User does not have an account",
+        });
+      }
+
+      const { credits } = accountDoc.data();
+
+      if (credits <= 0) {
+        return res.status(400).json({
+          message: "You do not have enough credits. Go buy some!",
         });
       }
     } else if (role !== "unlimited") {
@@ -105,6 +95,125 @@ exports.createCall = async (req, res) => {
     console.error("createCall", error);
     res.status(500).json({
       message: error.message,
+    });
+  }
+};
+
+exports.acceptCall = async (req, res) => {
+  try {
+    const { uid } = validateUser(req);
+    const { callId } = req.body;
+
+    if (!callId) {
+      return res.status(400).json({
+        message: "Call id is required",
+      });
+    }
+
+    const callRef = firestore.collection("calls").doc(callId);
+
+    const callDoc = await callRef.get();
+
+    if (!callDoc.exists) {
+      return res.status(400).json({
+        message: "Call does not exist",
+      });
+    }
+
+    const { userOnOtherSide, from } = callDoc.data();
+
+    if (uid !== userOnOtherSide) {
+      return res.status(400).json({
+        message: "You are not the user on the other side of the call",
+      });
+    }
+
+    // if from is a friend of the userOnOtherSide or the userOnOtherSide is a friend of from
+    const query = firestore
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .doc(from);
+
+    const doc = await query.get();
+
+    if (!doc.exists) {
+      return res.status(400).json({
+        message: "User is not your friend",
+      });
+    }
+
+    const query2 = firestore
+      .collection("users")
+      .doc(from)
+      .collection("friends")
+      .doc(uid);
+
+    const doc2 = await query2.get();
+
+    if (!doc2.exists) {
+      return res.status(400).json({
+        message: "User is not your friend",
+      });
+    }
+
+    // update call and decrement credits of userOnOtherSide by 1
+
+    const batch = firestore.batch();
+
+    batch.update(callRef, {
+      callAccepted: true,
+    });
+
+    // decrement credits of from by 1 if has user role
+    const userRef = firestore.collection("users").doc(from);
+
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(400).json({
+        message: "User does not exist",
+      });
+    }
+
+    const { role } = userDoc.data();
+
+    console.log("role", role);
+
+    if (role === "user") {
+      const accountRef = firestore.collection("accounts").doc(from);
+      const accountDoc = await accountRef.get();
+
+      if (!accountDoc.exists) {
+        return res.status(400).json({
+          message: "User does not have an account",
+        });
+      }
+
+      const { credits } = accountDoc.data();
+
+      if (credits <= 0) {
+        return res.status(400).json({
+          message: "User on the other side does not have enough credits",
+        });
+      }
+
+      console.log("credits", credits);
+
+      batch.update(accountRef, {
+        credits: increment(-1),
+      });
+    }
+
+    await batch.commit();
+
+    res.status(200).json({
+      message: "Call accepted successfully",
+    });
+  } catch (error) {
+    console.error("acceptCall", error);
+    res.status(500).json({
+      message: "Error accepting call",
     });
   }
 };

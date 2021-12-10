@@ -6,6 +6,7 @@ import {
   resetCallDetails,
   setIsReceivingCall,
 } from "../../features/call/call-slice";
+import { useAcceptCallMutation } from "../../features/call-api/call-api-slice";
 import {
   Avatar,
   makeStyles,
@@ -65,6 +66,7 @@ const IncomingCallNotification = () => {
   const activeCall = useSelector((state) => state.call.activeCall);
   const isReceivingCall = useSelector((state) => state.call.isReceivingCall);
   const dispatch = useDispatch();
+  const [acceptCall, { isSuccess }] = useAcceptCallMutation();
 
   const handleClick = (Transition) => () => {
     setTransition(() => Transition);
@@ -76,15 +78,11 @@ const IncomingCallNotification = () => {
     setOpen(false);
   };
   const handleAcceptCall = async () => {
-    dispatch(setIsReceivingCall(true));
     setOpen(false);
-
-    const callDoc = firestore.collection("calls").doc(activeCall.callDocId);
-
-    await callDoc.update({
-      callAccepted: true,
+    dispatch(setIsReceivingCall(true));
+    await acceptCall({
+      callId: activeCall.callDocId,
     });
-    history.push("/call");
   };
 
   const handleDecline = async () => {
@@ -105,6 +103,12 @@ const IncomingCallNotification = () => {
   useEffect(() => {
     dispatch(resetCallDetails());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isSuccess && activeCall) {
+      history.push("/call");
+    }
+  }, [isSuccess, activeCall, history]);
 
   useEffect(() => {
     if (isReceivingCall && activeCall) {
