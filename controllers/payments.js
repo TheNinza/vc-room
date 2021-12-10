@@ -85,6 +85,18 @@ exports.checkout = async (req, res) => {
       },
     });
 
+    // store this session to firebase for future reference
+    const sessionsRef = firestore
+      .collection("accounts")
+      .doc(uid)
+      .collection("sessions")
+      .doc(session.id);
+
+    await sessionsRef.set({
+      sessionId: session.id,
+      createdAt: timestamp(),
+    });
+
     res.status(200).json({
       message: "Checkout session created successfully",
       session,
@@ -127,6 +139,8 @@ exports.handleStripeWebhook = async (req, res) => {
     STRIPE_WEBHOOK_SECRET
   );
 
+  console.log(`Hooks Received For ======>>>>> ${event.type}`);
+
   try {
     if (event.type === "checkout.session.completed") {
       const {
@@ -137,37 +151,33 @@ exports.handleStripeWebhook = async (req, res) => {
       } = event.data.object;
 
       // check if the payment was successful and then update user's call credits in firebase
-      if (payment_status === "paid") {
-        const {
-          metadata: { firebaseUID },
-        } = await stripe.customers.retrieve(customer);
 
-        const {
-          transform_quantity: { divide_by: credits },
-        } = await stripe.prices.retrieve(priceId);
+      const {
+        metadata: { firebaseUID },
+      } = await stripe.customers.retrieve(customer);
 
-        const creditsRef = firestore.collection("accounts").doc(firebaseUID);
+      const {
+        transform_quantity: { divide_by: credits },
+      } = await stripe.prices.retrieve(priceId);
 
-        if (!(await creditsRef.get()).exists) {
-          await creditsRef.set({
-            credits,
-            sessionsArray: [
-              {
-                sessionId,
-                createdAt: timestamp(),
-              },
-            ],
-          });
-        } else {
-          await creditsRef.update({
-            credits: increment(credits),
-            sessionsArray: arrayUnion({
-              sessionId,
-              createdAt: timestamp(),
-            }),
-          });
-        }
-      }
+      const batch = firestore.batch();
+
+      // update user's call credits in firebase
+      const userRef = firestore.collection("accounts").doc(firebaseUID);
+
+      batch.update(userRef, {
+        credits: increment(credits),
+      });
+
+      // update session in firebase
+      const sessionRef = userRef.collection("sessions").doc(sessionId);
+
+      batch.update(sessionRef, {
+        paymentStatus: payment_status,
+        paidAt: timestamp(),
+      });
+
+      await batch.commit();
     }
 
     res.status(200).json({
