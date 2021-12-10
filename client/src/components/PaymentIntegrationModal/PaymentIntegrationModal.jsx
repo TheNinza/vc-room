@@ -11,7 +11,10 @@ import { useState } from "react";
 import { ReactComponent as CoinIcon } from "../../assets/vsCoin.svg";
 import { ReactComponent as CoinIconSmall } from "../../assets/vsCoinSmall.svg";
 import { ReactComponent as CoinIconLarge } from "../../assets/vsCoinLarge.svg";
-import { useFetchProductsQuery } from "../../features/payments-api/payments-api-slice";
+import {
+  useCheckoutMutation,
+  useFetchProductsQuery,
+} from "../../features/payments-api/payments-api-slice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -131,11 +134,20 @@ const PaymentIntegrationModal = () => {
   const [selectedPlan, setSelectedPlan] = useState(0);
 
   const { data = [], isLoading } = useFetchProductsQuery();
+  const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
 
   const images = [<CoinIconLarge />, <CoinIconSmall />, <CoinIcon />];
+
+  // helper functions
+
+  const handleCheckout = async () => {
+    const { id } = data[selectedPlan];
+    checkout({ id });
+  };
+
   return (
     <div className={classes.root}>
       <Typography
@@ -157,6 +169,7 @@ const PaymentIntegrationModal = () => {
           <div className={classes.planContainer}>
             {data.map((plan, idx) => (
               <Paper
+                key={idx}
                 elevation={0}
                 className={`${classes.planBox} ${
                   selectedPlan === idx ? "selected" : ""
@@ -201,8 +214,14 @@ const PaymentIntegrationModal = () => {
               </Paper>
             ))}
           </div>
-          <Button size="large" variant="contained" color="primary">
-            Buy Now
+          <Button
+            disabled={isCheckoutLoading}
+            size="large"
+            variant="contained"
+            color="primary"
+            onClick={handleCheckout}
+          >
+            {isCheckoutLoading ? "Loading..." : "Buy Now"}
           </Button>
         </>
       )}

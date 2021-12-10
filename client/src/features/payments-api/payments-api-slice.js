@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/dist/query/react";
 import { auth } from "../../lib/firebase/firebase";
+import { rtkQueryToastLoader } from "../../utils/rtkQueryToastLoader";
 
 export const paymentsApi = createApi({
   reducerPath: "paymentsApi",
@@ -24,7 +25,27 @@ export const paymentsApi = createApi({
         return prices;
       },
     }),
+    checkout: builder.mutation({
+      query: (data) => ({
+        url: `/checkout`,
+        method: "POST",
+        body: data,
+      }),
+
+      onQueryStarted: (_data, { queryFulfilled }) => {
+        rtkQueryToastLoader(
+          queryFulfilled,
+          "Starting Your Payment",
+          async (response) => {
+            if (response.data?.session?.id) {
+              window.location.href = response.data.session.url;
+            }
+          },
+          true
+        );
+      },
+    }),
   }),
 });
 
-export const { useFetchProductsQuery } = paymentsApi;
+export const { useFetchProductsQuery, useCheckoutMutation } = paymentsApi;
