@@ -160,6 +160,78 @@ exports.retrieveSessionDetails = async (req, res) => {
   }
 };
 
+exports.retrieveAllSessionDetailsOfUser = async (req, res) => {
+  try {
+    const { uid } = validateUser(req);
+
+    // check if session exists in firebase
+    const sessionsRef = firestore
+      .collection("accounts")
+      .doc(uid)
+      .collection("sessions")
+      .orderBy("createdAt", "desc");
+
+    const sessionsSnapshot = await sessionsRef.get();
+
+    if (sessionsSnapshot.empty) {
+      res.status(404).json({
+        message: "No sessions found",
+      });
+
+      return;
+    }
+
+    const sessions = sessionsSnapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    });
+
+    const sessionDetails = await Promise.all(
+      sessions.map(async ({ sessionId, createdAt = null, paidAt = null }) => {
+        return {
+          ...(await stripe.checkout.sessions.retrieve(sessionId, {
+            expand: ["payment_intent"],
+          })),
+          createdAt: createdAt ? createdAt.toMillis() : null,
+          paidAt: paidAt ? paidAt.toMillis() : null,
+        };
+      })
+    );
+
+    const sessionDetailsWithPrice = await Promise.all(
+      sessionDetails.map(async (session) => {
+        const price = await stripe.prices.retrieve(session.metadata.priceId);
+
+        return {
+          sessionId: session.id,
+          paymentStatus: session.payment_intent.status,
+          receiptUrl: session.payment_intent?.charges.data[0]?.receipt_url,
+          resumeUrl: session.url,
+          name: price.nickname,
+          amount: price.unit_amount / 100,
+          quantity: price.transform_quantity.divide_by,
+          customerEmail: session.customer_details.email,
+          createdAt: session.createdAt,
+          paidAt: session.paidAt,
+          id: session.id,
+        };
+      })
+    );
+
+    res.status(200).json({
+      message: "Successfully retrieved session details",
+      sessions: sessionDetailsWithPrice,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
 exports.handleStripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const event = stripe.webhooks.constructEvent(

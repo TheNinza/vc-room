@@ -26,6 +26,7 @@ import {
 } from "../features/user-api/user-api-slice";
 import toast from "react-hot-toast";
 import CoinCounter from "../components/CoinCounter/CoinCounter";
+import PaymentsTable from "../components/PaymentsTable/PaymentsTable";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -412,6 +413,13 @@ const Profile = () => {
       </div>
 
       <CallChart uid={user.uid} />
+      <div style={{ width: "100%" }}>
+        <Typography variant="h5" align="center" gutterBottom>
+          Your Payments
+        </Typography>
+
+        <PaymentsTable />
+      </div>
 
       <Dialog
         open={open}

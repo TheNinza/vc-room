@@ -56,6 +56,9 @@ export const paymentsApi = createApi({
         rtkQueryToastLoader(queryFulfilled, "Retrieving Your Payment");
       },
     }),
+    fetchAllSessionsOfUser: builder.query({
+      query: () => `/retrieveAllSessionDetailsOfUser`,
+    }),
   }),
 });
 
@@ -63,4 +66,5 @@ export const {
   useFetchProductsQuery,
   useCheckoutMutation,
   useFetchSessionQuery,
+  useFetchAllSessionsOfUserQuery,
 } = paymentsApi;
