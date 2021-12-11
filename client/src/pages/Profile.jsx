@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     flex: 1,
     position: "relative",
+    marginTop: "7rem",
 
     width: "100%",
     margin: "0 auto",
