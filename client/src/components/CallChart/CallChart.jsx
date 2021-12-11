@@ -31,11 +31,11 @@ const useStyles = makeStyles((theme) => ({
     padding: "1rem",
     flex: 1,
     position: "relative",
-    width: "100%",
+    width: "60%",
     [theme.breakpoints.down("800")]: {
       padding: "0.5rem",
       overflowX: "scroll",
-
+      width: "100%",
       "& canvas": {
         overflowX: "scroll",
       },
