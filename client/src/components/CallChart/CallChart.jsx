@@ -159,7 +159,7 @@ const CallChart = ({ uid }) => {
   useEffect(() => {
     if (chartRef.current && containerRef.current) {
       let containerWidth = containerRef.current.clientWidth;
-      let containerHeight = containerRef.current.clientHeight;
+      let containerHeight = containerRef.current.clientHeight - 60;
 
       const width =
         (days * 91 > containerWidth ? days * 91 : containerWidth) - 20;
@@ -172,7 +172,7 @@ const CallChart = ({ uid }) => {
           (days * 91 > containerWidth ? days * 91 : containerWidth) - 20;
 
         containerWidth = containerRef.current?.clientWidth;
-        containerHeight = containerRef.current?.clientHeight;
+        containerHeight = containerRef.current?.clientHeight - 60;
         if (containerHeight && containerWidth) {
           targetCtx?.chart?.resize(
             matches ? width : containerWidth,
