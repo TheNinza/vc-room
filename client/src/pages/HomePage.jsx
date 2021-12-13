@@ -306,18 +306,12 @@ const HomePage = () => {
         <DialogTitle id="privacy-policy-dialog">Privacy Policy</DialogTitle>
         <DialogContent>
           <DialogContentText id="privacy-policy-dialog">
-            <Typography variant="h6" component="h6" gutterBottom>
-              This website is a personal project of{" "}
-              <a
-                href="https://linkedin.com/in/theninza"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Nikhil Gupta
-              </a>
-              .
-            </Typography>
-            <Typography Typography variant="body1" component="p" gutterBottom>
+            <Typography
+              variant="h6"
+              component="h6"
+              gutterBottom
+              color="textPrimary"
+            >
               The data that we store and manipulate are as following:
             </Typography>
             <ul>
@@ -334,17 +328,14 @@ const HomePage = () => {
                 </a>
                 .
               </li>
-
               <li>
                 Your uploaded images. We store the images in a cloud storage
                 service called firestore storage.
               </li>
-
               <li>
                 As this is a personal project, and all stripe transactions are
                 dummy transactions, we do not store any of the card details.
               </li>
-
               <li>
                 Your device information required to create a WebRTC connection.
                 For more information, please visit{" "}
@@ -367,6 +358,25 @@ const HomePage = () => {
                 </a>
                 .
               </li>
+              <Typography
+                Typography
+                variant="h6"
+                component="h6"
+                gutterBottom
+                color="textPrimary"
+              >
+                On account deletion, we will delete the following data:
+              </Typography>
+
+              <ul>
+                <li>
+                  Your public google profile information (name, email, profile,
+                  etc).
+                </li>
+                <li>Your uploaded images.</li>
+                <li>All the calls that you have made.</li>
+                <li>All the notifications related to you.</li>
+              </ul>
             </ul>
           </DialogContentText>
         </DialogContent>
