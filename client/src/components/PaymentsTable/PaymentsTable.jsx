@@ -125,7 +125,6 @@ const PaymentsTable = () => {
   });
 
   useEffect(() => {
-    console.log("data", data);
     if (data?.sessions) {
       setRows(data.sessions);
     } else {
