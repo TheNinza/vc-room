@@ -9,7 +9,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@material-ui/core";
-import hero from "../assets/homepage-hero.svg";
+import { ReactComponent as HeroImage } from "../assets/homepage-hero.svg";
 import { ReactComponent as GoogleIcon } from "../assets/google.svg";
 import { signInWithGoogle } from "../lib/firebase/firebase";
 import { useState } from "react";
@@ -40,6 +40,25 @@ const useStyles = makeStyles((theme) => ({
   },
   heroImage: {
     width: "100%",
+    height: "100%",
+
+    "& #papers": {
+      animation: "$rotate 2s ease-in-out infinite alternate",
+      transformOrigin: "center",
+      transformBox: "fill-box",
+    },
+
+    "& #girlHair": {
+      animation: "$wave 1s ease-in-out infinite alternate",
+      transformOrigin: "center",
+      transformBox: "fill-box",
+    },
+
+    "& #grass": {
+      animation: "$grass 1s ease-in-out infinite alternate",
+      transformOrigin: "bottom",
+      transformBox: "fill-box",
+    },
   },
   imageContainer: {
     alignSelf: "center",
@@ -102,6 +121,33 @@ const useStyles = makeStyles((theme) => ({
     transition: "all 0.3s ease-in-out",
     "&:hover": {
       transform: "translateY(-2px)",
+    },
+  },
+
+  "@keyframes rotate": {
+    "0%": {
+      transform: "rotate(0deg)",
+    },
+    "100%": {
+      transform: "rotate(15deg)",
+    },
+  },
+
+  "@keyframes wave": {
+    "0%": {
+      transform: "skewX(0deg)",
+    },
+    "100%": {
+      transform: "skewX(-15deg)",
+    },
+  },
+
+  "@keyframes grass": {
+    "0%": {
+      transform: "skewX(0deg)",
+    },
+    "100%": {
+      transform: "skewX(5deg)",
     },
   },
 }));
@@ -175,7 +221,7 @@ const HomePage = () => {
         </Typography>
       </div>
       <div className={`${classes.imageContainer} ${classes.flexChildren}`}>
-        <img className={classes.heroImage} src={hero} alt="hero" />
+        <HeroImage className={classes.heroImage} />
       </div>
       <div className={classes.footer}>
         <Typography variant="body1" color="textSecondary">
@@ -306,12 +352,7 @@ const HomePage = () => {
         <DialogTitle id="privacy-policy-dialog">Privacy Policy</DialogTitle>
         <DialogContent>
           <DialogContentText id="privacy-policy-dialog">
-            <Typography
-              variant="h6"
-              component="h6"
-              gutterBottom
-              color="textPrimary"
-            >
+            <Typography variant="h6" gutterBottom color="textPrimary">
               The data that we store and manipulate are as following:
             </Typography>
             <ul>
@@ -361,7 +402,6 @@ const HomePage = () => {
               <Typography
                 Typography
                 variant="h6"
-                component="h6"
                 gutterBottom
                 color="textPrimary"
               >
