@@ -6,10 +6,9 @@ export const paymentsApi = createApi({
   reducerPath: "paymentsApi",
   baseQuery: fetchBaseQuery({
     baseUrl:
-      process.env.NODE_ENV === "production"
+      (process.env.NODE_ENV === "production"
         ? process.env.REACT_APP_BACKEND_PROD
-        : process.env.REACT_APP_BACKEND_DEV + "/api/payments",
-
+        : process.env.REACT_APP_BACKEND_DEV) + "/api/payments",
     prepareHeaders: async (headers) => {
       const token = await auth.currentUser.getIdToken(true);
       headers.set("Authorization", `Bearer ${token}`);
