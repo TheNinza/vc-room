@@ -43,19 +43,19 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
 
     "& #papers": {
-      animation: "$rotate 2s ease-in-out infinite alternate",
+      animation: "$rotate 2.4s ease-in-out infinite alternate",
       transformOrigin: "center",
       transformBox: "fill-box",
     },
 
     "& #girlHair": {
-      animation: "$wave 1s ease-in-out infinite alternate",
+      animation: "$wave 2s ease-in-out infinite alternate",
       transformOrigin: "center",
       transformBox: "fill-box",
     },
 
     "& #grass": {
-      animation: "$grass 1s ease-in-out infinite alternate",
+      animation: "$grass 1.5s 0.2s ease-in-out infinite alternate",
       transformOrigin: "bottom",
       transformBox: "fill-box",
     },
