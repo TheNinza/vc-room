@@ -288,6 +288,8 @@ exports.deleteUser = async (req, res) => {
 
     batch.delete(status);
 
+    // *Not deleting user's accounts as they will be reflected in platform finances (Currently on demo)* //
+
     // delete the user
     batch.delete(userRef);
 

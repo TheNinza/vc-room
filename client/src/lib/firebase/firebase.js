@@ -35,6 +35,8 @@ export const getUserDataFromUserAuth = async (user) => {
   if (snapShot.exists) {
     return snapShot.data();
   } else {
+    const batch = firestore.batch();
+
     const data = {
       uid: user.uid,
       displayName: user.displayName,
@@ -45,7 +47,16 @@ export const getUserDataFromUserAuth = async (user) => {
       role: "user",
     };
 
-    await userRef.set(data);
+    batch.set(userRef, data);
+
+    // set accounts
+    const accountsRef = firestore.collection("accounts").doc(user.uid);
+    batch.set(accountsRef, {
+      uid: user.uid,
+      credits: 2,
+    });
+
+    await batch.commit();
 
     return await userRef.get().then((doc) => {
       return doc.data();

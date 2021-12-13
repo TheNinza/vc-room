@@ -14,5 +14,15 @@ const firestore = firestoreApp.firestore();
 const bucket = getStorage().bucket();
 const serverTimestamp = firebaseAdmin.firestore.FieldValue.serverTimestamp;
 const timestamp = firebaseAdmin.firestore.Timestamp.now;
+const increment = firebaseAdmin.firestore.FieldValue.increment;
+const arrayUnion = firebaseAdmin.firestore.FieldValue.arrayUnion;
 
-module.exports = { auth, bucket, firestore, serverTimestamp, timestamp };
+module.exports = {
+  auth,
+  bucket,
+  firestore,
+  serverTimestamp,
+  timestamp,
+  increment,
+  arrayUnion,
+};

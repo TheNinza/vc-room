@@ -25,16 +25,20 @@ import {
   useUpdateUserMutation,
 } from "../features/user-api/user-api-slice";
 import toast from "react-hot-toast";
+import CoinCounter from "../components/CoinCounter/CoinCounter";
+import PaymentsTable from "../components/PaymentsTable/PaymentsTable";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flex: 1,
     position: "relative",
     marginTop: "7rem",
-    width: "60%",
+
+    width: "100%",
     margin: "0 auto",
     display: "flex",
     flexDirection: "column",
+    alignItems: "center",
     gap: "3rem",
     padding: "1.5rem 0",
     [theme.breakpoints.down("sm")]: {
@@ -42,10 +46,11 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down("xs")]: {
       width: "100%",
+      marginTop: "10vh",
     },
   },
   flexParent: {
-    width: "100%",
+    width: "60%",
     display: "flex",
     gap: "2rem",
     justifyContent: "center",
@@ -53,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: "column",
       alignItems: "center",
       gap: "1rem",
+      width: "100%",
     },
   },
   paper: {
@@ -304,7 +310,7 @@ const Profile = () => {
               onChange={handleImageChange}
             />
           </Badge>
-
+          <CoinCounter position="static" />
           <Typography variant="subtitle1">{userDetail.email}</Typography>
           <Typography
             variant="subtitle1"
@@ -407,6 +413,13 @@ const Profile = () => {
       </div>
 
       <CallChart uid={user.uid} />
+      <div style={{ width: "100%" }}>
+        <Typography variant="h5" align="center" gutterBottom>
+          Your Payments
+        </Typography>
+
+        <PaymentsTable />
+      </div>
 
       <Dialog
         open={open}

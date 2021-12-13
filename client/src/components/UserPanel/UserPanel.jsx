@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 
 import profileSvgSrc from "../../assets/profileWave.svg";
 import { selectNumFriends } from "../../features/friends/friends-selector";
+import CoinCounter from "../CoinCounter/CoinCounter";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -150,6 +151,7 @@ const UserPanel = ({ setFriendPanelHeight }) => {
           </div>
         </div>
         <div className={classes.profileText}>
+          <CoinCounter />
           <Typography
             gutterBottom
             variant={!matches ? "h5" : "subtitle1"}

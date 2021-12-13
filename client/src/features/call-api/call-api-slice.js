@@ -11,7 +11,7 @@ export const callApi = createApi({
         ? process.env.REACT_APP_BACKEND_PROD
         : process.env.REACT_APP_BACKEND_DEV) + "/api/call",
     prepareHeaders: async (headers) => {
-      const token = await auth.currentUser.getIdToken();
+      const token = await auth.currentUser.getIdToken(true);
       headers.set("Authorization", `Bearer ${token}`);
       return headers;
     },
@@ -30,6 +30,18 @@ export const callApi = createApi({
       },
     }),
 
+    acceptCall: builder.mutation({
+      query: (data) => ({
+        url: "/acceptCall",
+        method: "POST",
+        body: data,
+      }),
+
+      onQueryStarted: async (_data, { queryFulfilled, dispatch }) => {
+        rtkQueryToastLoader(queryFulfilled, "Accepting Call...");
+      },
+    }),
+
     deleteCall: builder.mutation({
       query: (data) => ({
         url: "/deleteCall",
@@ -43,4 +55,8 @@ export const callApi = createApi({
   }),
 });
 
-export const { useCreateCallMutation, useDeleteCallMutation } = callApi;
+export const {
+  useCreateCallMutation,
+  useDeleteCallMutation,
+  useAcceptCallMutation,
+} = callApi;
