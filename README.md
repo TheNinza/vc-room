@@ -1,6 +1,6 @@
 # VC-Room
 
-A video call application made with [React.js](https://reactjs.org/) + [Firebase](https://firebase.google.com/) + [WebRTC](https://webrtc.org/)
+A video call application made with [React.js](https://reactjs.org/) + [Firebase](https://firebase.google.com/) + [WebRTC](https://webrtc.org/).
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/theninza/vc-room?style=for-the-badge)&nbsp;
 ![GitHub issues](https://img.shields.io/github/issues/theninza/vc-room?style=for-the-badge)&nbsp;
@@ -15,6 +15,12 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 ![Material-UI](https://img.shields.io/badge/Material--UI-05122A?style=for-the-badge&logo=material-ui)&nbsp;
 ![NodeJS](https://img.shields.io/badge/Node--JS-05122A?style=for-the-badge&logo=nodedotjs)&nbsp;
 ![ExpressJS](https://img.shields.io/badge/Express--JS-05122A?style=for-the-badge&logo=express)&nbsp;
+![WebRTC](https://img.shields.io/badge/WebRTC-05122A?style=for-the-badge&logo=webrtc)&nbsp;
+![Stripe](https://img.shields.io/badge/Stripe-05122A?style=for-the-badge&logo=stripe)&nbsp;
+![Socket.io](https://img.shields.io/badge/Socket.io-05122A?style=for-the-badge&logo=socket.io)&nbsp;
+![ESLint](https://img.shields.io/badge/ESLint-05122A?style=for-the-badge&logo=eslint)&nbsp;
+![Git](https://img.shields.io/badge/Git-05122A?style=for-the-badge&logo=git)&nbsp;
+![Jest](https://img.shields.io/badge/Jest-05122A?style=for-the-badge&logo=jest)
 ![Figma](https://img.shields.io/badge/Figma-05122A?style=for-the-badge&logo=figma)&nbsp;
 
 ## Goals
@@ -37,6 +43,8 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 
 :white_check_mark: &nbsp;Mobile Responsiveness
 
+:white_check_mark: &nbsp;Stripe Integration
+
 ## Local Setup
 
 1. Install the dependencies and devDependencies and start the server.
@@ -57,11 +65,13 @@ npm install
 ```env
 # ./.env
 
-FIREBASE_CONFIG = <Value>
-FRONT_END_DEV = <Value>
-FRONT_END_PROD = <Value>
-NODE_ENV = <Value>
-FIREBASE_BUCKET_NAME = <Value>
+FIREBASE_CONFIG = <VALUE>
+FRONT_END_DEV = <VALUE>
+FRONT_END_PROD = <VALUE>
+NODE_ENV = <VALUE>
+FIREBASE_BUCKET_NAME = <VALUE>
+STRIPE_SECRET_KEY = <VALUE>lKC6FsbSgFb7v000ujbdD7v
+STRIPE_WEBHOOK_SECRET = <VALUE>
 ```
 
 ```env
@@ -83,3 +93,5 @@ REACT_APP_BACKEND_PROD = <Value>
 ```sh
 npm run dev
 ```
+
+5. Start stripe cli webhook listner. For more information visit [https://stripe.com/docs/webhooks](https://stripe.com/docs/webhooks).
