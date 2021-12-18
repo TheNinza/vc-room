@@ -20,7 +20,6 @@ A video call application made with [React.js](https://reactjs.org/) + [Firebase]
 ![Socket.io](https://img.shields.io/badge/Socket.io-05122A?style=for-the-badge&logo=socket.io)&nbsp;
 ![ESLint](https://img.shields.io/badge/ESLint-05122A?style=for-the-badge&logo=eslint)&nbsp;
 ![Git](https://img.shields.io/badge/Git-05122A?style=for-the-badge&logo=git)&nbsp;
-![Jest](https://img.shields.io/badge/Jest-05122A?style=for-the-badge&logo=jest)
 ![Figma](https://img.shields.io/badge/Figma-05122A?style=for-the-badge&logo=figma)&nbsp;
 
 ## Goals
