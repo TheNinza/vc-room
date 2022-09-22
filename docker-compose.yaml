@@ -1,0 +1,15 @@
+version: "3"
+services:
+  vc-room-server:
+    container_name: vc-room-server
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app:ro
+      - /app/node_modules
+    env_file:
+      - ./.env
+    environment:
+      - NODE_ENV=development
+    command: npm run server

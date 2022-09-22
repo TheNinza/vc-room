@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  node-app:
+    container_name: vc-room-server
+    image: vc-room-server-image
+    build: .
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./.env
+# no need to expose port 3000, because we are using nginx
+#     ports:
+#       - "8000:8000"
+
+# adding existing nginx network
+networks:
+  default:
+    name: nginxproxymanager_default
+    external: true

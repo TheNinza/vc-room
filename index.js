@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { decodeJWT } = require("./middlewares/decodeJWT.js");
-const { FRONT_END } = require("./configs/environments.js");
+const { FRONT_END, NODE_ENV } = require("./configs/environments.js");
 const morgan = require("morgan");
 const socketIO = require("socket.io");
 const { auth, firestore, serverTimestamp } = require("./configs/firebase");
@@ -30,7 +30,7 @@ app.use(
   })
 );
 app.use(decodeJWT);
-app.use(morgan("dev"));
+app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
 
 // endpoints
 app.get("/", (_req, res) => {

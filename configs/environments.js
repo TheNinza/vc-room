@@ -9,4 +9,5 @@ module.exports = {
   FIREBASE_BUCKET_NAME: process.env.FIREBASE_BUCKET_NAME,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  NODE_ENV: process.env.NODE_ENV || "development",
 };

@@ -1,0 +1,35 @@
+
+
+# compiled output
+.vscode
+/node_modules
+
+# only building server. not client
+/client
+
+# code formatter
+.eslintrc
+.eslintignore
+.editorconfig
+.huskyrc
+.lintstagedrc.json
+.prettierrc
+
+# test
+jest.config.js
+
+# docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# git
+.gitignore
+.gitattributes
+.git
+
+
+# misc
+.env
+*.md
+*.yml
