@@ -47,6 +47,20 @@ docker image prune -f
 echo "${GREEN}✅ Removed dangling images${NC}"
 echo "\n"
 
+# keep making calls to https://api.call.theninza.me/api/ping until it returns 200
+# for max 5 times
+echo "${YELLOW}Waiting for the application to be ready${NC}"
+for i in {1..5} ; do
+    STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://api.call.theninza.me/api/ping)
+    if [ $STATUS_CODE -eq 200 ]; then
+        echo "${GREEN}✅ Application is ready${NC}"
+        echo "\n"
+        break
+    fi
+    echo "${YELLOW}⏳ Application is not ready yet${NC}"
+    sleep 5
+done
+
 # end of script
 echo "${GREEN} 🎉 Deployment completed 🎉 ${NC}"
 echo "${GREEN}============================${NC}"
