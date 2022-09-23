@@ -1,44 +1,53 @@
+# decorate the output with colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+# check if the script is running as root
+
+# create a banner
+echo "${YELLOW}Deploying the application${NC}"
+echo "${GREEN}=========================${NC}"
+
 # check for .env file
-echo "Checking for .env file..."
+echo "${YELLOW}Checking for .env file${NC}"
 if [ ! -f .env ]; then
-    echo "Error: .env file not found"
+    echo "${RED}Error: .env file not found! ${NC}"
     exit 1
 fi
-echo "Found .env file"
+echo "${GREEN}✅ Found .env file${NC}"
 echo "\n"
 
 # check for docker-compose.prod.yaml file
-echo "Checking for docker-compose.prod.yaml file..."
+echo "${YELLOW}Checking for docker-compose.prod.yaml file${NC}"
 if [ ! -f docker-compose.prod.yaml ]; then
-    echo "Error: docker-compose.prod.yaml file not found"
+    echo "${RED}Error: docker-compose.prod.yaml file not found! ${NC}"
     exit 1
 fi
-echo "Found docker-compose.prod.yaml file"
+echo "${GREEN}✅ Found docker-compose.prod.yaml file${NC}"
 echo "\n"
 
 
 # stop and remove containers
-echo "Stopping and removing containers..."
+echo "${YELLOW}Stopping and removing containers${NC}"
 docker-compose -f docker-compose.prod.yaml down -v
-echo "\n"
-
-# remove images
-echo "Removing images..."
-  # get image name from docker-compose.prod.yaml
-IMAGE_NAME=$(grep image docker-compose.prod.yaml | awk '{print $2}')
-  # remove image
-echo "Removing image $IMAGE_NAME"
-docker rmi $IMAGE_NAME
+echo "${GREEN}✅ Stopped and removed containers${NC}"
 echo "\n"
 
 
-# build image
-echo "Building image..."
-docker-compose -f docker-compose.prod.yaml build
-echo "\n"
-
-# build latest images
-echo "Building latest images..."
+# build latest images and run containers
+echo "${YELLOW}Building latest images and running containers${NC}"
 docker-compose -f docker-compose.prod.yaml up -d --build
+echo "${GREEN}✅ Built latest images and ran containers${NC}"
 echo "\n"
+
+# remove dangling images
+echo "${YELLOW}Removing dangling images${NC}"
+docker image prune -f
+echo "${GREEN}✅ Removed dangling images${NC}"
+echo "\n"
+
+# end of script
+echo "${GREEN} 🎉 Deployment completed 🎉 ${NC}"
+echo "${GREEN}============================${NC}"
 
