@@ -4,9 +4,6 @@
 .vscode
 /node_modules
 
-# only building server. not client
-/client
-
 # code formatter
 .eslintrc
 .eslintignore
@@ -21,15 +18,26 @@ jest.config.js
 # docker
 Dockerfile
 docker-compose.yml
+docker-compose.yaml
+docker-compose.*.yml
+docker-compose.*.yaml
 .dockerignore
 
 # git
 .gitignore
 .gitattributes
 .git
+/.github
+LICENCE
+LICENSE
 
 
 # misc
 .env
 *.md
 *.yml
+.DS_Store
+
+# custom
+/client
+deploy.sh

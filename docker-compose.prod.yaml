@@ -9,10 +9,10 @@ services:
       - NODE_ENV=production
     env_file:
       - ./.env
-# no need to expose port 3000, because we are using nginx
-#     ports:
-#       - "8000:8000"
-
+    restart: unless-stopped
+    # no need to expose port 8000, because we are using nginx
+    # ports:
+    #   - "8000:8000"
 # adding existing nginx network
 networks:
   default:
