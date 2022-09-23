@@ -40,7 +40,7 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/api/ping", (_req, res) => {
-  res.send("okay here you go... pong!!!!");
+  res.send("okay here you go... ponggggg!!!!");
 });
 
 app.use("/api/suggestions", require("./routes/suggestions.js"));
