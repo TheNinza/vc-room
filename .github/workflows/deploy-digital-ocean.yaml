@@ -1,17 +1,11 @@
 name: deploy-digitalocean
 
 on:
-  pull_request:
-    types:
-      - closed
-    branches:
-      - "main"
   push:
     branches: ["main"]
 
 jobs:
   Deploy-PR:
-    if: ${{ github.event_name == 'push' || github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
