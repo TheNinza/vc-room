@@ -1,9 +1,6 @@
 name: deploy-digitalocean
 
-on:
-  push:
-    tags:
-      - Release - *
+on: push
 
 jobs:
   Deploy:
@@ -12,6 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Deploy in DigitalOcean - say hi
+        if: contains(github.event.head_commit.message, 'Release')
         env:
           PRIVATE_KEY: ${{ secrets.SSH_KEY_NINVM  }}
           USER_NAME: ${{ secrets.SSH_NINVM_USER }}
