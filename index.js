@@ -11,7 +11,6 @@ const { auth, firestore, serverTimestamp } = require("./configs/firebase");
  */
 
 const app = express();
-app.enable("trust proxy");
 // middlewares
 
 app.use(
@@ -30,6 +29,9 @@ app.use(
   })
 );
 app.use(decodeJWT);
+
+// enable trust proxy for nginx reverse proxy
+app.enable("trust proxy");
 app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
 
 // endpoints
