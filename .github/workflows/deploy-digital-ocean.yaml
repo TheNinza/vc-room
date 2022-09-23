@@ -1,0 +1,28 @@
+name: deploy-digitalocean
+
+on:
+  push:
+    tags:
+      - Release - *
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy in DigitalOcean - say hi
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_KEY_NINVM  }}
+          USER_NAME: ${{ secrets.SSH_NINVM_USER }}
+          HOSTNAME: ${{ secrets.SSH_NINVM_HOST }}
+          HOSTNAME_IP6: ${{ secrets.SSH_NINVM_HOST_IP6 }}
+
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 700 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << EOF
+          cd /home/theninza/applications/vc-room && \
+          git reset --hard \
+          git pull origin main \
+          sh deploy.sh
+          EOF

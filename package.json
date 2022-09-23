@@ -1,6 +1,6 @@
 {
   "name": "vc-room",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A video call application made with [React.js](https://reactjs.org/) + [Firebase](https://firebase.google.com/) + [WebRTC](https://webrtc.org/)",
   "main": "index.js",
   "engines": {
