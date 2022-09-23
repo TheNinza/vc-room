@@ -11,7 +11,7 @@ const { auth, firestore, serverTimestamp } = require("./configs/firebase");
  */
 
 const app = express();
-
+app.enable("trust proxy");
 // middlewares
 
 app.use(
