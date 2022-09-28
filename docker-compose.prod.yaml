@@ -10,6 +10,9 @@ services:
     env_file:
       - ./.env
     restart: unless-stopped
+    #add label for watchtower ignore
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     # no need to expose port 8000, because we are using nginx
     # ports:
     #   - "8000:8000"
