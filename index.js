@@ -66,43 +66,53 @@ const io = socketIO(server, {
 
 // socket.io events
 io.on("connection", async (socket) => {
-  const token = socket.handshake.auth.token;
-  if (!token) {
-    socket.disconnect();
-    return;
-  }
-
-  const currentUser = await auth.verifyIdToken(token);
-
-  // set status online in firestore
-  const { uid } = currentUser;
-  const userRef = firestore.collection("users").doc(uid);
-
-  const userSnapshot = await userRef.get();
-
-  if (!userSnapshot.exists) {
-    socket.disconnect();
-    return;
-  }
-
-  const statusRef = firestore.collection("status").doc(uid);
-  // set status online in status ref
-  await statusRef.set({
-    status: "online",
-    timestamp: serverTimestamp(),
-  });
-
-  console.log(`${currentUser.email} is online`);
-
-  socket.on("disconnect", async () => {
-    // set status offline in firestore
-    if ((await statusRef.get()).exists) {
-      await statusRef.set({
-        status: "offline",
-        timestamp: serverTimestamp(),
-      });
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      socket.disconnect();
+      return;
     }
 
-    console.log(`${currentUser.email} is offline`);
-  });
+    const currentUser = await auth.verifyIdToken(token);
+
+    // set status online in firestore
+    const { uid } = currentUser;
+    const userRef = firestore.collection("users").doc(uid);
+
+    const userSnapshot = await userRef.get();
+
+    if (!userSnapshot.exists) {
+      socket.disconnect();
+      return;
+    }
+
+    const statusRef = firestore.collection("status").doc(uid);
+    // set status online in status ref
+    await statusRef.set({
+      status: "online",
+      timestamp: serverTimestamp(),
+    });
+
+    console.log(`${currentUser.email} is online`);
+
+    socket.on("disconnect", async () => {
+      try {
+        // set status offline in firestore
+        if ((await statusRef.get()).exists) {
+          await statusRef.set({
+            status: "offline",
+            timestamp: serverTimestamp(),
+          });
+        }
+
+        console.log(`${currentUser.email} is offline`);
+      } catch (error) {
+        console.log(error);
+        socket.disconnect();
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    socket.disconnect();
+  }
 });
