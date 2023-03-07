@@ -33,14 +33,14 @@ app.use(decodeJWT);
 // enable trust proxy for nginx reverse proxy
 app.enable("trust proxy");
 
-const skipLoggingEndpoints = [
-  "/api/ping"
-];
-app.use(morgan(NODE_ENV === "production" ? "combined" : "dev", {
-  skip: (req, res) => {
-    return skipLoggingEndpoints.includes(req.url);
-  }
-}));
+const skipLoggingEndpoints = ["/api/ping"];
+app.use(
+  morgan(NODE_ENV === "production" ? "combined" : "dev", {
+    skip: (req, res) => {
+      return skipLoggingEndpoints.includes(req.url);
+    },
+  })
+);
 
 // endpoints
 app.get("/", (_req, res) => {
