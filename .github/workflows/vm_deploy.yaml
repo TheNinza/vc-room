@@ -1,4 +1,4 @@
-name: deploy-digitalocean
+name: deploy-vm
 
 on:
   push:
